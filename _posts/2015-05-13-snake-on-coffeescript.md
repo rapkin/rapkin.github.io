@@ -1,7 +1,7 @@
 ---
 layout:      post
 title:       snake on coffeescript
-date:        2015-05-13 23:17:42
+date:        2015-05-13 13:17:42
 categories:  coffee
 description: HTML5/JavaScript game written on CoffeeScript.
 keywords:    game, coffeescript, html5, javascript, snake, 2D game
@@ -15,4 +15,4 @@ Source code for the entire project [on github][snake-github]. You can build game
 
 [demo]:         https://snake-on-coffee.herokuapp.com/
 [snake-github]: https://github.com/rapkin/snake/
-[term-paper]:   /coffee/2015/05/11/my-term-paper/
+[term-paper]:   /coffee/2015/05/10/my-term-paper/
