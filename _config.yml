@@ -1,0 +1,14 @@
+name:             rapkin
+authors:          rapkin
+# description:      
+
+highlighter:      pygments
+permalink:        pretty
+
+# Server
+source:           docs
+url:              http://rapkin.github.io
+encoding:         UTF-8
+
+# Custom vars
+repo:             https://github.com/rapkin/rapkin.github.io
