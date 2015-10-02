@@ -1,14 +1,17 @@
-name:             rapkin
-authors:          rapkin
-# description:      
+url:              http://rapkin.com.ua
+title:            rapkin
+author:           Mikola Parfenyuck
+email:            mikola.parfenyuck@gmail.com
+description:      Little blog about my little projects.
+keywords:         software, blog, developer, rapkin, programming
 
 highlighter:      pygments
 permalink:        pretty
+markdown:         redcarpet
+redcarpet:
+    extensions: ["strikethrough", "tables"]
 
-# Server
-source:           docs
-url:              http://rapkin.github.io
-encoding:         UTF-8
-
-# Custom vars
+twitter_username: i_rapkin
+github_username:  rapkin
+vk_username:      i_rapkin
 repo:             https://github.com/rapkin/rapkin.github.io
