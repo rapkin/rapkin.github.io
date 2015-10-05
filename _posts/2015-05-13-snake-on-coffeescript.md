@@ -15,4 +15,4 @@ Source code for the entire project [on github][snake-github]. You can build game
 
 [demo]:         https://snake-on-coffee.herokuapp.com/
 [snake-github]: https://github.com/rapkin/snake/
-[term-paper]:   /coffee/2015/05/10/my-term-paper/
+[term-paper]:   /coffee/my-term-paper/
