@@ -3,11 +3,15 @@
  */
 .site-header {
     border-top: 5px solid $grey-color-dark;
+    background: #A43A37;
     border-bottom: 1px solid $grey-color-light;
     min-height: 56px;
 
     // Positioning context for the mobile navigation icon
     position: relative;
+    a {
+        color: #fff;
+    }
 }
 
 .site-title {
@@ -16,11 +20,6 @@
     letter-spacing: -1px;
     margin-bottom: 0;
     float: left;
-
-    &,
-    &:visited {
-        color: $grey-color-dark;
-    }
 }
 
 .site-nav {
@@ -32,7 +31,6 @@
     }
 
     .page-link {
-        color: $text-color;
         line-height: $base-line-height;
 
         // Gaps between nav items, but not on the first one
@@ -45,7 +43,7 @@
         position: absolute;
         top: 9px;
         right: 30px;
-        background-color: $background-color;
+        background-color: $grey-color-dark;
         border: 1px solid $grey-color-light;
         border-radius: 5px;
         text-align: right;

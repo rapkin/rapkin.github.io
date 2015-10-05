@@ -92,10 +92,6 @@ a {
     color: $brand-color;
     text-decoration: none;
 
-    &:visited {
-        color: darken($brand-color, 15%);
-    }
-
     &:hover {
         color: $text-color;
         text-decoration: underline;
@@ -128,18 +124,24 @@ blockquote {
 pre,
 code {
     font-size: 15px;
+    background-color: #222;
     border: 1px solid $grey-color-light;
     border-radius: 3px;
-    background-color: #eef;
 }
 
 code {
+    background-color: #ddd;
     padding: 1px 5px;
 }
 
+pre code {
+    background-color: #222;
+}
+
 pre {
+    color: #ccc;
     padding: 8px 12px;
-    overflow-x: scroll;
+    overflow-x: auto;
 
     > code {
         border: 0;
