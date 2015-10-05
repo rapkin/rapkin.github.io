@@ -2,9 +2,9 @@
 layout:      post
 title:       snake on coffeescript
 date:        2015-05-13 13:17:42
-categories:  coffee
+category:    coffee
 description: HTML5/JavaScript game written on CoffeeScript.
-keywords:    game, coffeescript, html5, javascript, snake, 2D game
+keywords:    [game, coffeescript, html5, javascript, snake, 2D game]
 ---
 
 To learn CoffeeScript I started writing a little game. [Demo here!][demo]

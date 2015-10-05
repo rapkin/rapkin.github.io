@@ -2,9 +2,9 @@
 layout:      post
 title:       My term paper (Курсова)
 date:        2015-05-10 14:34:08
-categories:  coffee
+category:    coffee
 description: Курсова робота з дисципліни Бази даних. Розробка змійки на мові CoffeeScript з використанням бази даних MongoDB.
-keywords:    term paper, курсова, coffeescript, html5, javascript, snake, nodejs, gulp, mongodb, stylus, jade, expressjs, курсова з програмування, гра, змійка, 2D гра, бази даних, курсова з баз даних
+keywords:    [term paper, курсова, coffeescript, html5, javascript, snake, nodejs, gulp, mongodb, stylus, jade, expressjs, курсова з програмування, гра, змійка, 2D гра, бази даних, курсова з баз даних]
 ---
 
 <a id="zmist"></a>

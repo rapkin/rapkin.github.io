@@ -3,10 +3,11 @@ title:            rapkin | Software developer
 author:           Mikola Parfenyuck
 email:            mikola.parfenyuck@gmail.com
 description:      Little blog about my little projects.
-keywords:         software, blog, developer, rapkin, programming
+keywords:         [software, blog, developer, rapkin, programming]
 
 highlighter:      pygments
-permalink:        pretty
+permalink:        /:categories/:title/
+googleAnalytics:  UA-37531241-1
 markdown:         redcarpet
 redcarpet:
     extensions: ["strikethrough", "tables"]
