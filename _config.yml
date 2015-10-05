@@ -1,9 +1,8 @@
 url:              http://rapkin.com.ua
-title:            rapkin | Software developer
 author:           Mikola Parfenyuck
 email:            mikola.parfenyuck@gmail.com
+title:            rapkin | Software developer
 description:      Little blog about my little projects.
-keywords:         [software, blog, developer, rapkin, programming]
 
 highlighter:      pygments
 permalink:        /:categories/:title/
