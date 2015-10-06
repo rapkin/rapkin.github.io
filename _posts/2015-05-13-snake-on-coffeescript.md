@@ -1,6 +1,6 @@
 ---
 layout:      post
-title:       snake on coffeescript
+title:       Snake on CoffeeScript
 date:        2015-05-13 13:17:42
 category:    coffee
 description: HTML5/JavaScript game written on CoffeeScript.
