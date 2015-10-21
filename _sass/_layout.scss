@@ -4,7 +4,7 @@
 .site-header {
     border-top: 5px solid $grey-color-dark;
     background: #A43A37;
-    border-bottom: 1px solid $grey-color-light;
+    box-shadow: 0 0 10px $grey-color-dark;
     min-height: 56px;
 
     // Positioning context for the mobile navigation icon
@@ -105,6 +105,10 @@
     margin-left: 0;
 }
 
+.text-description {
+    margin: 0;
+}
+
 .footer-col-wrapper {
     font-size: 15px;
     color: $grey-color;
@@ -124,16 +128,25 @@
 }
 
 .footer-col-2 {
+    text-align: center;
     width: -webkit-calc(20% - (#{$spacing-unit} / 2));
     width:         calc(20% - (#{$spacing-unit} / 2));
 }
 
 .footer-col-3 {
+    text-align: right;
     width: -webkit-calc(45% - (#{$spacing-unit} / 2));
     width:         calc(45% - (#{$spacing-unit} / 2));
 }
 
 @include media-query($on-laptop) {
+    .footer-heading,
+    .footer-col-1,
+    .footer-col-2,
+    .footer-col-3 {
+        text-align: center;
+    }
+
     .footer-col-1,
     .footer-col-2 {
         width: -webkit-calc(50% - (#{$spacing-unit} / 2));
@@ -207,6 +220,7 @@
 
 .post-content {
     margin-bottom: $spacing-unit;
+    text-align: justify;
 
     h1 {
         font-size: 32px;
