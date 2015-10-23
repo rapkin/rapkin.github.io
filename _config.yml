@@ -10,6 +10,8 @@ googleAnalytics:  UA-37531241-1
 markdown:         redcarpet
 redcarpet:
     extensions: ["strikethrough", "tables"]
+gems:
+  - jekyll-sitemap
 
 twitter_username: i_rapkin
 github_username:  rapkin
