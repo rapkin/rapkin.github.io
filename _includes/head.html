@@ -29,7 +29,7 @@
     {% endif %}
 
     {% if page.description %}
-        <meta name="description" content="{{ page.description }}" />
+        <meta name="description" itemprop="description" content="{{ page.description }}" />
         <meta property="og:description" content="{{ page.description }}" />
     {% endif %}
 
@@ -37,10 +37,8 @@
         <meta name="keywords" content="{{ page.keywords | join: ', ' }}" />
     {% endif %}
 
-
     <link href="/feed.xml" rel="alternate" title="rapkin | RSS" type="application/atom+xml" />
     <link rel="stylesheet" href="{{ "/css/main.css" | prepend: site.baseurl }}" />
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" />
     <link rel="canonical" href="{{ page.url | replace: 'index.html', '' | prepend: site.baseurl | prepend: site.url }}" />
     <meta property="og:url" content="{{ page.url | replace: 'index.html', '' | prepend: site.baseurl | prepend: site.url }}" />
 </head>

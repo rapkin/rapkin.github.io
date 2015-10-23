@@ -44,7 +44,7 @@
         top: 9px;
         right: 30px;
         background-color: $grey-color-dark;
-        border: 1px solid $grey-color-light;
+        box-shadow: 0 0 1px $grey-color-dark;
         border-radius: 5px;
         text-align: right;
 
@@ -56,15 +56,6 @@
             line-height: 0;
             padding-top: 10px;
             text-align: center;
-
-            > svg {
-                width: 18px;
-                height: 15px;
-
-                path {
-                    fill: $grey-color-dark;
-                }
-            }
         }
 
         .trigger {
@@ -102,7 +93,30 @@
 .contact-list,
 .social-media-list {
     list-style: none;
-    margin-left: 0;
+    margin: 0;
+}
+
+.social-media-list {
+    font-size: 0px;
+
+    .fa {
+        display: block;
+        font-size: 26px;
+    }
+
+    a {
+        margin: 0 5px;
+        display: inline-block;
+        text-decoration: none;
+
+        .username {
+            font-size: 12px;
+        }
+
+        &:hover .username {
+            text-decoration: underline;
+        }
+    }
 }
 
 .text-description {
@@ -129,14 +143,14 @@
 
 .footer-col-2 {
     text-align: center;
-    width: -webkit-calc(20% - (#{$spacing-unit} / 2));
-    width:         calc(20% - (#{$spacing-unit} / 2));
+    width: -webkit-calc(30% - (#{$spacing-unit} / 2));
+    width:         calc(30% - (#{$spacing-unit} / 2));
 }
 
 .footer-col-3 {
     text-align: right;
-    width: -webkit-calc(45% - (#{$spacing-unit} / 2));
-    width:         calc(45% - (#{$spacing-unit} / 2));
+    width: -webkit-calc(35% - (#{$spacing-unit} / 2));
+    width:         calc(35% - (#{$spacing-unit} / 2));
 }
 
 @include media-query($on-laptop) {
@@ -183,10 +197,12 @@
 .post-list {
     margin-left: 0;
     list-style: none;
+}
 
-    > li {
-        margin-bottom: $spacing-unit;
-    }
+.post-item {
+    border-left: solid $brand-color 5px;
+    padding-left: $spacing-unit;
+    margin-bottom: $spacing-unit;
 }
 
 .post-meta {
@@ -197,6 +213,7 @@
 .post-link {
     display: block;
     font-size: 24px;
+    margin: 0;
 }
 
 
