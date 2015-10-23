@@ -7,6 +7,8 @@
     <meta property="og:site_name" content="{{ site.title }}" />
     <meta name="author" content="{{ site.author }}">
     <meta property="article:author" content="{{ site.author }}" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@{{ site.twitter_username }}">
 
     {% if page.date %}
         <meta property="article:published_time" content="{{ page.date | date_to_xmlschema }}" />
@@ -23,14 +25,17 @@
     {% if page.title %}
         <title>{{ page.title }}</title>
         <meta property="og:title" content="{{ page.title }}" />
+        <meta name="twitter:title" content="{{ page.title }}" />
     {% else %}
         <title>{{ site.title }}</title>
         <meta property="og:title" content="{{ site.title }}" />
+        <meta name="twitter:title" content="{{ site.title }}" />
     {% endif %}
 
     {% if page.description %}
         <meta name="description" itemprop="description" content="{{ page.description }}" />
         <meta property="og:description" content="{{ page.description }}" />
+        <meta name="twitter:description" content="{{ page.description }}" />
     {% endif %}
 
     {% if page.keywords %}
@@ -38,6 +43,7 @@
     {% endif %}
 
     <link href="/feed.xml" rel="alternate" title="rapkin | RSS" type="application/atom+xml" />
+    <link rel="shortcut icon" href="/favicon.ico">
     <link rel="stylesheet" href="{{ "/css/main.css" | prepend: site.baseurl }}" />
     <link rel="canonical" href="{{ page.url | replace: 'index.html', '' | prepend: site.baseurl | prepend: site.url }}" />
     <meta property="og:url" content="{{ page.url | replace: 'index.html', '' | prepend: site.baseurl | prepend: site.url }}" />
