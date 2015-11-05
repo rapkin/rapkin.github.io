@@ -9,7 +9,7 @@ permalink:        /:categories/:title/
 googleAnalytics:  UA-37531241-1
 markdown:         redcarpet
 redcarpet:
-    extensions: ["strikethrough", "tables"]
+  extensions: ["strikethrough", "tables"]
 gems:
   - jekyll-sitemap
 
