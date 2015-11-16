@@ -1,4 +1,7 @@
 ---
+redirect_from:
+  - /snake/
+  - /coffee/2015/05/13/snake-on-coffeescript/
 layout:      post
 title:       Snake on CoffeeScript
 date:        2015-05-13 13:17:42

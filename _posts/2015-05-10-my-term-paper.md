@@ -1,4 +1,6 @@
 ---
+redirect_from:
+  - /kursova/
 layout:      post
 title:       My term paper (Курсова)
 date:        2015-05-10 14:34:08

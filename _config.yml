@@ -3,6 +3,7 @@ author:           Mikola Parfenyuck
 email:            mikola.parfenyuck@gmail.com
 title:            rapkin | Software developer
 description:      Little blog about my little projects.
+timezone:         UA
 
 highlighter:      pygments
 permalink:        /:categories/:title/
@@ -10,8 +11,6 @@ googleAnalytics:  UA-37531241-1
 markdown:         redcarpet
 redcarpet:
   extensions: ["strikethrough", "tables"]
-gems:
-  - jekyll-sitemap
 
 twitter_username: i_rapkin
 github_username:  rapkin
