@@ -10,7 +10,12 @@ permalink:        /:categories/:title/
 googleAnalytics:  UA-37531241-1
 markdown:         redcarpet
 redcarpet:
-  extensions: ["strikethrough", "tables"]
+  extensions:
+  - strikethrough
+  - tables
+gems:
+- jekyll-redirect-from
+- jekyll-sitemap
 
 twitter_username: i_rapkin
 github_username:  rapkin
