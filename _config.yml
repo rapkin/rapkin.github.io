@@ -5,7 +5,7 @@ title:            rapkin | Software developer
 description:      Little blog about my little projects.
 timezone:         UA
 
-highlighter:      pygments
+highlighter:      rouge
 permalink:        /:categories/:title/
 googleAnalytics:  UA-37531241-1
 markdown:         kramdown
