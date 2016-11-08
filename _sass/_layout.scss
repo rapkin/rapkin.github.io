@@ -208,6 +208,10 @@
 .post-meta {
   font-size: $small-font-size;
   color: $grey-color;
+
+  .fa {
+    margin: 0 5px;
+  }
 }
 
 .post-link {
