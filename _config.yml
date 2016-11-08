@@ -5,9 +5,9 @@ title:            rapkin | Software developer
 description:      Little blog about my little projects.
 timezone:         UA
 
-highlighter:      rouge
 permalink:        /:categories/:title/
-googleAnalytics:  UA-37531241-1
+
+highlighter:      rouge
 markdown:         kramdown
 gems:
 - jekyll-redirect-from
@@ -17,3 +17,6 @@ twitter_username: i_rapkin
 github_username:  rapkin
 vk_username:      i_rapkin
 repo:             https://github.com/rapkin/rapkin.github.io
+
+googleAnalytics:  UA-37531241-1
+yandexVerification: 39324391851d1a5d

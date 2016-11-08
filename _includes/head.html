@@ -42,6 +42,10 @@
     <meta name="keywords" content="{{ page.keywords | join: ', ' }}" />
   {% endif %}
 
+  {% if site.yandexVerification %}
+    <meta name="yandex-verification" content="{{ site.yandexVerification }}" />
+  {% endif %}
+
   <link href="/feed.xml" rel="alternate" title="rapkin | RSS" type="application/atom+xml" />
   <link rel="shortcut icon" href="/favicon.ico">
   <link rel="stylesheet" href="{{ "/css/main.css" | prepend: site.baseurl }}" />
