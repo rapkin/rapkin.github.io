@@ -8,8 +8,10 @@ layout: default
     <p class="post-meta">
       <i class="fa fa-calendar"></i>
       <span itemprop="dateCreated">{{ page.date | date: "%b %-d, %Y" }}</span>
-      {% if page.author or site.author %}
-        <i class="fa fa-pencil"></i> <span itemprop="author">{{ page.author ? page.author : site.author }}</span>
+      {% if page.author %}
+        <i class="fa fa-pencil"></i> <span itemprop="author">{{ page.author }}</span>
+      {% else %}
+        <i class="fa fa-pencil"></i> <span itemprop="author">{{ site.author }}</span>
       {% endif %}
     </p>
   </header>
