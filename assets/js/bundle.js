@@ -2143,7 +2143,7 @@
 	})(window, document, "script", "//www.google-analytics.com/analytics.js", "ga");
 
 	ga("create", id, "auto");
-	ga("send", "pageview");
+	ga("send", "pageview", location.pathname);
 
 	const ll = new LazyLoad({ elements_selector: ".lazyload" });
 	const sw = new Swup({
@@ -2167,7 +2167,7 @@
 	sw.on("contentReplaced", () => {
 	  ll.update();
 	  handleAchor();
-	  ga("send", "pageview");
+	  ga("send", "pageview", location.pathname);
 	});
 
 }());
