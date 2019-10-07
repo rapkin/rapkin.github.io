@@ -1,0 +1,380 @@
+<!DOCTYPE html><html lang="en"><head><title>Сегментуємо міста на зони використовуючи сітку доріг - @rapkin</title><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="ie=edge"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="yandex-verification" content="39324391851d1a5d"/><meta name="description" content="Розробка алгоритму для автоматичної розмітки міст з використанням Python, Shapely та OpenStreetMap"/><link rel="stylesheet" href="/assets/css/site.css"/><link rel="preconnect" href="https://www.google-analytics.com"/><link rel="preconnect" href="http://fonts.googleapis.com"/></head><body><div class="top"><header role="banner"><a class="logo" href="/">@rapkin</a><span class="logo-details">Software developer</span><div class="menu-wrapper"><li><a class="menu-item" href="/resume">Resume</a></li><li><a class="menu-item" href="/about">About</a></li></div></header><main id="swup"><h1 class="page-title">Сегментуємо міста на зони використовуючи сітку доріг</h1><p><div class="lazyload" style="padding-bottom: 50%" data-bg="url(/assets/optimized-img/segmentation-title.png)" title="Сегментовані міста Європи"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/segmentation-title.png"></a></div></p>
+<p>Інколи розділити якусь територію на набір зон може бути корисно.
+Для прикладу сегментувати знімки з супутника.
+В подальшому можна використати ці дані для навчання нейронних мереж, що буде автоматично класифікувати територію на основі нових знімків, або ж знімків територій, що мають недостатнє охоплення векторними даними.
+(В цьому блозі вже робився огляд підходу по класифікації територій).</p>
+<h2 id="що-нам-потрібно-для-цього">Що нам потрібно для цього?</h2>
+<p>Якщо коротко то Python (Cython), Shapely, OSM/Overpass та Aspectum щоб робити візуалізацію.
+А тепер по кожному пункту:</p>
+<ul>
+<li><p><strong>Python</strong> - насправді можна спробувати і на іншій мові зробити аналогічне (наприклад використавши JavaScript та Turf.js), та в деяких місцях на Python є можливість щось оптимізувати без особливих зусиль. Наприклад використати Cython для компіляції коду написаного на python в нативне розширення.</p>
+</li>
+<li><p><strong>Shapely</strong> - потрібен для операцій з геометрією.</p>
+</li>
+<li><p><strong>Geopandas</strong> - потрібен для роботи з датасетами shape-файлів.</p>
+</li>
+<li><p><strong>OSM (OpenStreetMap)</strong> - відкритий ресурс, де і буде взято всю необхідну геометрію.</p>
+</li>
+<li><p><strong>Overpass</strong> - API щоб завантажувати, фільтрувати чи трансформувати дані з OSM.</p>
+</li>
+<li><p><strong>osm2geojson</strong> - бібліотека для конвертації даних OSM (та Overpass) в геометрію. Більше деталей в репозиторії <a href="https://github.com/aspectumapp/osm2geojson" target="_blank" rel="noopener" >aspectumapp/osm2geojson</a></p>
+</li>
+<li><p><strong>Land polygons</strong> - датасет берегової лінії <a href="https://osmdata.openstreetmap.de/data/land-polygons.html" target="_blank" rel="noopener" >osmdata/land-polygons</a></p>
+</li>
+<li><p><strong>Aspectum</strong> - сервіс для візуалізації та аналізу картографічної інформації. Можна скористатись і geojson.io, але при великій кількості геометрію можуть виникати проблеми з продуктивністю. Часто можна замінити інтерфейсом QGIS. Сторінка сервісу <a href="https://aspectum.com" target="_blank" rel="noopener" >aspectum.com</a></p>
+</li>
+</ul>
+<h2 id="що-конкретно-ми-хочемо-отримати">Що конкретно ми хочемо отримати?</h2>
+<p>GeoJson файл, в якому містяться набір полігонів певних зон (класифікованих за набором правил).
+Зони мають бути виділені на основі сітки доріг, залізничних шляхів, водних об&#39;єктів.
+Прокласифікувати ці зони можна використавши метадані з OSM (теги які позначають тип будівлі, земельної ділянки і тд).</p>
+<h2 id="який-алгоритм-виконання-такого-завдання">Який алгоритм виконання такого завдання?</h2>
+<ul>
+<li><p>Завантажуємо геометрію coastline (це необхідно для правильної побудови зон міст які знаходяться біля океану).</p>
+</li>
+<li><p>Завантажуємо межу міста з OSM і формуємо з неї полігон (або мультиполігон в загальному випадку).</p>
+</li>
+<li><p>Завантажуємо дороги, залізничні шляхи, водні об&#39;єкти і формуємо з них відповідну геометрію (навколо ліній будуємо буфери, полігони залишаємо у вигляді полігонів).</p>
+</li>
+<li><p>Завантаження іншої геометрії з OSM, яка необхідна для подальшої класифікації (це теж полігони).</p>
+</li>
+<li><p>Проектуємо всю геометрію в прямокутну систему координат аби позбутись спотворень при виконанні геометричних операцій.</p>
+</li>
+<li><p>Формуємо мультиполігон вирахуваної об&#39;єднаної зони доріг.</p>
+</li>
+<li><p>Аналогічно формуємо мультиполігон водних об&#39;єктів.</p>
+</li>
+<li><p>Від межі міста віднімаємо сформовані мультиполігони доріг та водних об&#39;єктів, що в результаті дасть мультиполігон нерозмічених зон.</p>
+</li>
+<li><p>Класифікуємо кожну зону за певним набором правил, наприклад знаходячи суму пересічень з іншими об&#39;єктами на карті (будинками, полями і тд).</p>
+</li>
+<li><p>Проектуємо назад у полярну систему координат.</p>
+</li>
+<li><p>Зберігаємо результати.</p>
+</li>
+</ul>
+<p>На цьому алгоритм можна було б і завершити, але через візуальну засміченість результатів такого &quot;простого&quot; алгоритму, появилась необхідність провести додаткові трансформації геометрії.</p>
+<p><div class="lazyload" style="padding-bottom: 63.36559940431869%" data-bg="url(/assets/optimized-img/not-merged.png)" title="Залізнична розв&#39;язка у місті Київ"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/not-merged.png"></a></div></p>
+<p>Тому перед відніманням зони доріг від межі міста можна додати пункт:</p>
+<ul>
+<li>Об&#39;єднання паралельних та близько розміщених доріг.</li>
+</ul>
+<p>А перед пунктом класифікації додамо ще один пункт:</p>
+<ul>
+<li>Згладження форми отриманих нерозмічених зон.
+Варто відмітити, що в деяких місцях порядок не обов&#39;язковий і є можливість асинхронно виконувати якісь завдання (наприклад завантаження інформації, або робота з кожним класом геометрії).</li>
+</ul>
+<p>Тепер можна детальніше привести приклади коду для кожного пункту.</p>
+<h2 id="завантаження-даних-з-osm">Завантаження даних з OSM</h2>
+<p>Не зміг знайти хорошої бібліотеки аби відпарсити дані OSM (якщо я погано шукав, то поділіться такою бібліотекою в коментарях), тому щоб сформувати з набору XML даних якусь геометрію я написав бібліотеку <a href="https://github.com/aspectumapp/osm2geojson" target="_blank" rel="noopener" >osm2geojson</a>, яка б перетворила OSM/Overpass XML в геометрію.
+Доречі, для роботи з Overpass JSON там теж є функції.</p>
+<p>Отож отримати межу міста можна простим запитом до API Overpass:</p>
+<pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_city_border</span><span class="hljs-params">(city_id)</span>:</span>
+  data = overpass_call(<span class="hljs-string">f"""
+    rel(<span class="hljs-subst">{city_id}</span>);
+    out geom;
+  """</span>) <span class="hljs-comment"># returns xml-string</span>
+  data = xml2geojson(data)
+
+  <span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> data[<span class="hljs-string">'features'</span>]:
+    <span class="hljs-keyword">if</span> f[<span class="hljs-string">'properties'</span>][<span class="hljs-string">'tags'</span>][<span class="hljs-string">'type'</span>] == <span class="hljs-string">'boundary'</span>:
+      <span class="hljs-keyword">return</span> f
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span></code></pre>
+<p>Для отримання набору доріг запит уже складніший:</p>
+<pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_roads</span><span class="hljs-params">(minlat, minlon, maxlat, maxlon)</span>:</span>
+  bb = <span class="hljs-string">f"(<span class="hljs-subst">{minlat}</span>, <span class="hljs-subst">{minlon}</span>, <span class="hljs-subst">{maxlat}</span>, <span class="hljs-subst">{maxlon}</span>)"</span>
+  data = cached_overpass_call(<span class="hljs-string">f"""
+    way[highway~"^motorway$|^trunk$|^primary$|^secondary$|^tertiary$|^residential$"]<span class="hljs-subst">{bb}</span>;
+    out geom;
+  """</span>)
+  <span class="hljs-keyword">return</span> xml2geojson(data)[<span class="hljs-string">'features'</span>]</code></pre>
+<p>Водні об’єкти я завантажую досить великим запитом, адже там зустрічається як лінійна геометрія так і полігональна.</p>
+<pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_water_zones</span><span class="hljs-params">(minlat, minlon, maxlat, maxlon)</span>:</span>
+  bb = <span class="hljs-string">f"(<span class="hljs-subst">{minlat}</span>, <span class="hljs-subst">{minlon}</span>, <span class="hljs-subst">{maxlat}</span>, <span class="hljs-subst">{maxlon}</span>)"</span>
+  data = cached_overpass_call(<span class="hljs-string">f"""
+    (
+      way[waterway~"^river$|^stream$|^riverbank$"]<span class="hljs-subst">{bb}</span>;
+      way[landuse=basin]<span class="hljs-subst">{bb}</span>;
+      way[natural=water]<span class="hljs-subst">{bb}</span>;
+      way[water]<span class="hljs-subst">{bb}</span>;
+      rel[landuse=basin]<span class="hljs-subst">{bb}</span>;
+      rel[natural=water]<span class="hljs-subst">{bb}</span>;
+      rel[water]<span class="hljs-subst">{bb}</span>;
+      rel[waterway=riverbank]<span class="hljs-subst">{bb}</span>;
+      &lt;;
+    );
+    out geom;
+  """</span>)
+  <span class="hljs-keyword">return</span> xml2geojson(data)[<span class="hljs-string">'features'</span>]</code></pre>
+<p>Інформацію про берегову лінію можна завантажити вручну (адже це один датасет для всієї планети), але корисно мати для цього код, який завантажує та кешує цей датасет, адже він може змінюватись.
+Після завантаження датасету, його потрібно розархівувати та отримати геометрію:</p>
+<pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_coastline</span><span class="hljs-params">()</span>:</span>
+  print(<span class="hljs-string">'Loading coastline to memory ...'</span>)
+  coastline_zip = get_coastline_file() <span class="hljs-comment"># returns abs path to zip file with dataset</span>
+  coastline_dir = coastline_zip.replace(<span class="hljs-string">'.zip'</span>, <span class="hljs-string">''</span>)
+  coastline_file = os.path.join(coastline_dir, <span class="hljs-string">'land_polygons.shp'</span>)
+
+  <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> os.path.exists(coastline_file):
+    r = zipfile.ZipFile(coastline_zip, <span class="hljs-string">'r'</span>)
+    r.extractall(config.CACHE_DIR)
+    r.close()
+
+  data = geopandas.read_file(coastline_file)
+  print(<span class="hljs-string">'Coastline loaded!'</span>)
+  <span class="hljs-keyword">return</span> data</code></pre>
+<h2 id="формування-початкової-геометрії">Формування початкової геометрії</h2>
+<p>Як було сказано раніше, робота з лінійною та полігональною геометріями відрізняється - адже полігони займають певну площу, а от для лінійної геометрію цю площу потрібно якось побудувати - перетворити лінію на полігон певного розміру, який би відповідав розмірам реального об’єкту.
+Аби зробити це перетворення можна використати операцію буферизації - грубо кажучи це розширення лінії.
+В документації Shapely більше деталей по роботі цього методу <a href="https://shapely.readthedocs.io/en/stable/manual.html#object.buffer" target="_blank" rel="noopener" >shapely/object.buffer</a>.</p>
+<p>З підбором розміру цього буферу теж все доволі просто - для різних видів доріг в OSM є свої теги і детальний опис як їх потрібно використовувати, наприклад, для доріг в Україні можна скористатись класифікацією з <a href="https://wiki.openstreetmap.org/wiki/Uk:%D0%92%D1%96%D0%BA%D1%96%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82_%D0%A3%D0%BA%D1%80%D0%B0%D1%97%D0%BD%D0%B0/%D0%9A%D0%BB%D0%B0%D1%81%D0%B8%D1%84%D1%96%D0%BA%D0%B0%D1%86%D1%96%D1%8F_%D0%B4%D0%BE%D1%80%D1%96%D0%B3" target="_blank" rel="noopener" >вікі OSM</a> (для інших країн теж існують подібні класифікації).
+А самі значення розміру дорожньої смуги можна знайти в державних стандартах (для більшості країн значення часто однакові).</p>
+<p>Для побудови буферів слугує функція build_buffer_on_lines, яка виконує побудову квадратного буферу.
+Цей вид буферу найкраще підходить для нашого випадку (по якості результату та кількості обчислень).</p>
+<pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">build_buffer_on_lines</span><span class="hljs-params">(lines, b_size)</span>:</span>
+  buffers = []
+  <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> lines:
+    b = line.buffer(b_size, cap_style=<span class="hljs-number">3</span>, join_style=<span class="hljs-number">2</span>, mitre_limit=<span class="hljs-number">1</span>)
+    buffers.append(b)
+  <span class="hljs-keyword">return</span> array_to_multipolygon(buffers)</code></pre>
+<p>Приклад перетворення geojson в геометрію shapely найкраще проілюстровано в формуванні зон водної території:</p>
+<pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">convert_water_features_to_zones</span><span class="hljs-params">(geoms)</span>:</span>
+  water_zones = []
+  lines = []
+  <span class="hljs-keyword">for</span> item <span class="hljs-keyword">in</span> geoms:
+    shape = geometry.shape(item[<span class="hljs-string">'geometry'</span>])
+    <span class="hljs-keyword">if</span> isinstance(shape, geometry.LineString) <span class="hljs-keyword">or</span> isinstance(shape, geometry.MultiLineString):
+      lines.append(shape)
+    <span class="hljs-keyword">if</span> isinstance(shape, geometry.Polygon) <span class="hljs-keyword">or</span> isinstance(shape, geometry.MultiPolygon):
+      water_zones.append(shape)
+
+  rivers = build_buffer_on_lines(lines, buffer_sizes[<span class="hljs-string">'river'</span>])
+  water_zones.append(rivers)
+  <span class="hljs-keyword">return</span> ops.cascaded_union(water_zones)</code></pre>
+<p>На жаль, процес класифікації геометрії OSM не вдасться повністю помістити в цю статтю (насправді це можна виділити в окрему величезну статтю), але в кількох словах завантаження всієї геометрії з OSM та розбиття за певними правилами на цільовий набір класів.</p>
+<pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_all_geometry</span><span class="hljs-params">(minlat, minlon, maxlat, maxlon)</span>:</span>
+  query = <span class="hljs-string">f"(node(<span class="hljs-subst">{minlat}</span>, <span class="hljs-subst">{minlon}</span>, <span class="hljs-subst">{maxlat}</span>, <span class="hljs-subst">{maxlon}</span>);&lt;;); out geom;"</span><span class="hljs-string">""</span>
+  data = cached_overpass_call(query)
+
+  features = []
+  <span class="hljs-keyword">for</span> item <span class="hljs-keyword">in</span> xml2geojson(data)[<span class="hljs-string">'features'</span>]:
+    <span class="hljs-keyword">if</span> item[<span class="hljs-string">'geometry'</span>][<span class="hljs-string">'type'</span>] <span class="hljs-keyword">in</span> [<span class="hljs-string">'Polygon'</span>, <span class="hljs-string">'MultiPolygon'</span>]:
+      cls = detect_class(item) <span class="hljs-comment"># here some magic</span>
+    <span class="hljs-keyword">if</span> cls <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+      <span class="hljs-keyword">continue</span>
+    item[<span class="hljs-string">'properties'</span>][<span class="hljs-string">'class'</span>] = cls
+    features.append(item)
+  <span class="hljs-keyword">return</span> features</code></pre>
+<p>В результаті цих операцій ми отримуємо початкові набори геометрії (на прикладі міста Київ):</p>
+<ul>
+<li>межа міста (border)</li>
+</ul>
+<p><div class="lazyload" style="padding-bottom: 94.90695396669932%" data-bg="url(/assets/optimized-img/border.png)" title="Межа міста Київ"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/border.png"></a></div></p>
+<ul>
+<li>мультиполігон звичайних дорожніх шляхів (roads)</li>
+</ul>
+<p><div class="lazyload" style="padding-bottom: 94.90695396669932%" data-bg="url(/assets/optimized-img/roads-kiev.png)" title="Дороги міста Київ"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/roads-kiev.png"></a></div></p>
+<ul>
+<li>мультиполігон залізничних шляхів (railways)</li>
+</ul>
+<p><div class="lazyload" style="padding-bottom: 94.90695396669932%" data-bg="url(/assets/optimized-img/railways-kiev.png)" title="Залізничні шляхи міста Київ"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/railways-kiev.png"></a></div></p>
+<ul>
+<li>мультиполігон водних об’єктів (water_zones)</li>
+</ul>
+<p><div class="lazyload" style="padding-bottom: 94.90695396669932%" data-bg="url(/assets/optimized-img/water-kiev.png)" title="Водні об&#39;єкти міста Київ"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/water-kiev.png"></a></div></p>
+<ul>
+<li>вся інша геометрія, по якій буде проводитись класифікація, згрупована за цільовим набором класів (all_geometry_by_class)</li>
+</ul>
+<p><div class="lazyload" style="padding-bottom: 94.90695396669932%" data-bg="url(/assets/optimized-img/classified-geom.png)" title="Класифікована геометрія міста Київ"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/classified-geom.png"></a></div></p>
+<h2 id="простий-алгоритм">“Простий” алгоритм</h2>
+<p>Для того щоб побудувати звичайну карту потрібно на межу міста накласти всю іншу геометрію з урахуванням пріоритетів.
+Визначення пріоритетності кожного класу не зовсім очевидне завдання, наприклад водні об’єкти мають найнижчий пріоритет, бо зазвичай дорожні та залізничні шляхи проходять над річками і тд.</p>
+<p>А от з дорогами та залізницею все трохи складніше, бо дорожні мости можуть проходити над залізничними шляхами, так і навпаки - залізничні мости над дорожніми шляхами.
+Але все ж краще виявилось надавати дорогам вищий пріоритет (кількість правильно розміченої території буде більша).
+Є і більш складна схема розподілу отриманої геометрії на шари, яка описана тут <a href="https://wiki.openstreetmap.org/wiki/Key:layer" target="_blank" rel="noopener" >wiki.osm/Key:layer</a>.
+Мінусом цього підходу у нашому випадку - значний ріст кількості обчислень.</p>
+<p><div class="lazyload" style="padding-bottom: 100%" data-bg="url(/assets/optimized-img/layers.png)" title="Результат накладання шарів"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/layers.png"></a></div></p>
+<p>Одним з важливих етапів в обрахунках є етап оптимізації геометрії.
+Необхідність цього виникає по причині надзвичайно великих полігонів доріг та водних об’єктів (інколи сітка доріг покриває ледь не все місто і формує один полігон).
+Використання такої геометрії призводить до неконтрольованого росту складності обчислень (на великих містах це може займати кілька діб).
+Щоб позбутись цієї проблеми можна просто розбивати великі полігони на менші. Вивчаючи цю тему я натрапив на корисну <a href="https://snorfalorpagus.net/blog/2016/03/13/splitting-large-polygons-for-faster-intersections/" target="_blank" rel="noopener" >статтю</a>, де теж вирішувалась ця проблема.
+Саме цей алгоритм розбиття я і використав.</p>
+<p>Ще одна важлива частина оптимізації це побудова індексу над наборами полігонів (детальніше про це можна почитати в <a href="https://geoffboeing.com/2016/10/r-tree-spatial-index-python/" target="_blank" rel="noopener" >цій статті</a>).
+В бібліотеці Shapely вже вбудований хороший алгоритм для індексації геометрії STRtree (Sort-Tile-Recursive algorithm).
+Код для обчислення пересічення та різниці полігонів трохи ускладниться (бо потрібно додати етап індексації та пошуку полігонів у індексі), але досить просто виділити ці операції в окремі методи</p>
+<pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">optimized_intersection</span><span class="hljs-params">(a, b)</span>:</span>
+  a_opt = katana(a, split_size)
+  b_opt = katana(b, split_size)
+  a_tree = STRtree(a_opt)
+
+  parts = []
+  <span class="hljs-keyword">for</span> zone <span class="hljs-keyword">in</span> b_opt:
+    <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> a_tree.query(zone):
+      intersection =  p.intersection(zone)
+      <span class="hljs-keyword">if</span> intersection.area &gt; <span class="hljs-number">0</span>:
+        parts.append(intersection)
+
+  <span class="hljs-keyword">return</span> array_to_multipolygon(parts)
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">optimized_difference</span><span class="hljs-params">(a, b)</span>:</span>
+  a_opt = katana(a, split_size)
+  b_opt = katana(b, split_size)
+  b_tree = STRtree(b_opt)
+
+  parts = []
+  <span class="hljs-keyword">for</span> zone <span class="hljs-keyword">in</span> a_opt:
+    <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> b_tree.query(zone):
+      zone = zone.difference(p)
+      parts.append(zone)
+
+  <span class="hljs-keyword">return</span> array_to_multipolygon(parts)</code></pre>
+<p>Після цього можна безпосередньо переходити до логіки алгоритму:</p>
+<pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">compute_simple_zones</span><span class="hljs-params">(border, roads, railways, water_zones)</span>:</span>
+  roads_in_city = optimized_intersection(roads, border)
+  railways_in_city = optimized_intersection(railways, border)
+  water_zones_in_city = optimized_intersection(water_zones, border)
+
+  water_zones_fixed = optimized_difference(water_zones_in_city, roads_in_city)
+  water_zones_fixed = optimized_difference(water_zones_fixed, railways_in_city)
+
+  city_zones = optimized_difference(border, roads)
+  city_zones = optimized_difference(city_zones, railways)
+  city_zones = optimized_difference(city_zones, water_zones)
+
+  railways_without_roads = optimized_difference(railways_in_city, roads_in_city)
+
+  features = multipolygon_to_features(roads_in_city, <span class="hljs-string">'roads'</span>)
+  features += multipolygon_to_features(water_zones_fixed, <span class="hljs-string">'water'</span>)
+  features += multipolygon_to_features(railways_without_roads, <span class="hljs-string">'railways'</span>)
+  features += multipolygon_to_features(city_zones)
+
+  <span class="hljs-keyword">return</span> features</code></pre>
+<p>В результаті ми отримали набір полігонів (в GeoJSON).
+Але кінцева ціль - отримати класифіковані зони міста, тому полігони які ще не мають класу потрібно якось класифікувати (зони доріг, залізниці та водних об’єктів ми вже отримали на попередніх етапах).</p>
+<p>Для прикладу можна прокласифікувати ці зони порахувавши площу пересічення з іншими полігонами OSM (які до цього були автоматично розмічені за цільовим набором класів).</p>
+<pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">classify_features</span><span class="hljs-params">(features, all_geometry_by_class)</span>:</span>
+  geometry_index = {}
+  <span class="hljs-keyword">for</span> cls <span class="hljs-keyword">in</span> all_geometry_by_class:
+    geometry_index[cls] = STRtree(all_geometry_by_class[cls])
+
+    <span class="hljs-keyword">for</span> feature <span class="hljs-keyword">in</span> features:
+      <span class="hljs-keyword">if</span> <span class="hljs-string">'class'</span> <span class="hljs-keyword">in</span> f[<span class="hljs-string">'properties'</span>]:
+        <span class="hljs-keyword">continue</span>
+
+      shape = geometry.shape(feature[<span class="hljs-string">'geometry'</span>])
+      <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> shape.is_valid:
+        print(<span class="hljs-string">'Shape is invalid! Try to fix'</span>)
+        shape = polygon_fix(shape)
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> shape.is_valid:
+          print(<span class="hljs-string">'Not fixed :('</span>, validation.explain_validity(shape))
+          <span class="hljs-keyword">continue</span>
+
+      probs = {}
+      <span class="hljs-keyword">for</span> cls <span class="hljs-keyword">in</span> geometry_index:
+        probs[cls] = <span class="hljs-number">0</span>
+        <span class="hljs-keyword">for</span> s <span class="hljs-keyword">in</span> geometry_index[cls].query(shape):
+          <span class="hljs-keyword">if</span> s.is_valid:
+            probs[cls] += shape.intersection(s).area
+
+      detected_class = <span class="hljs-string">'Artificial Surfaces'</span> <span class="hljs-comment"># default class</span>
+      max_area = <span class="hljs-number">0</span>
+      <span class="hljs-keyword">for</span> cls <span class="hljs-keyword">in</span> probs:
+        <span class="hljs-keyword">if</span> probs[cls] &gt; max_area:
+          max_area = probs[cls]
+          detected_class = cls
+
+      feature[<span class="hljs-string">'properties'</span>] = {
+        <span class="hljs-string">'class'</span>: detected_class,
+        <span class="hljs-string">'probabilities'</span>: normalize(probs)
+      }
+  <span class="hljs-keyword">return</span> features</code></pre>
+<p>Цікавою частиною тут є функція polygon_fix, яка часто допомагає впоратись з невалідною геометрією (на жаль, я вже й не пам’ятаю де знайшов код цієї функції).</p>
+<pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">polygon_fix</span><span class="hljs-params">(polygon)</span>:</span>
+  be = polygon.exterior
+  mls = be.intersection(be)
+  polygons = ops.polygonize(mls)
+  <span class="hljs-keyword">return</span> geometry.MultiPolygon(polygons)</code></pre>
+<p>На цьому основна частина алгоритму закінчується, а класифіковану геометрію можна зберегти в файл аби десь візуалізувати.</p>
+<p>Візуалізація для міста Київ з використанням QGIS</p>
+<p><div class="lazyload" style="padding-bottom: 94.90695396669932%" data-bg="url(/assets/optimized-img/kiev-simple.png)" title="Класифіковані зони міста Київ"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/kiev-simple.png"></a></div></p>
+<p>Роздивитись згенеровану геометрію можна використавши веб-платформу Aspectum:</p>
+<iframe title="Інтерактивна карта з класифікованими зонами" class="lazyload" data-src="https://aspectum.com/app/maps/embed/dbcc98bb-6bd2-49ee-92d0-26d03297a33b" width="960" height="600" frameborder="0" style="border: 0"></iframe>
+
+<h2 id="алгоритм-з-обєднанням-доріг">Алгоритм з об’єднанням доріг</h2>
+<p>Цей алгоритм майже не відрізняється від попереднього, відмінний лише етап утворення мультиполігонів доріг (звичайних та залізничних).
+Аби цього досягнути потрібно замість звичайної побудови буферів робити буфер більшого розміру, а потім операцією віднімання буферу отримувати полігони потрібного розміру, при цьому дороги які були поряд стануть об’єднаними.</p>
+<p><div class="lazyload" style="padding-bottom: 63.36559940431869%" data-bg="url(/assets/img/merge-vis.gif)" title="Візуалізація алгоритму об&#39;єднання доріг"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/merge-vis.gif"></a></div></p>
+<p>Код який це робить</p>
+<pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">merge_roads</span><span class="hljs-params">(polygon)</span>:</span>
+  area = polygon.buffer(merge_buffer_size, cap_style=<span class="hljs-number">2</span>, join_style=<span class="hljs-number">2</span>, mitre_limit=<span class="hljs-number">1</span>)
+  <span class="hljs-keyword">return</span> area.buffer(-merge_buffer_size, cap_style=<span class="hljs-number">2</span>, join_style=<span class="hljs-number">2</span>, mitre_limit=<span class="hljs-number">1</span>)</code></pre>
+<p>Різницю в геометрії, що генерується, можна побачити на зображенні.</p>
+<p><div class="lazyload" style="padding-bottom: 47.45347698334966%" data-bg="url(/assets/optimized-img/kiev-compare-geom.png)" title="Порівняння простої геометрії та після об&#39;єднання"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/kiev-compare-geom.png"></a></div></p>
+<p>А повне зображення для міста Київ:</p>
+<p><div class="lazyload" style="padding-bottom: 94.90695396669932%" data-bg="url(/assets/optimized-img/kiev-merged.png)" title="Зони міста Київ з об&#39;єднаними дорогами"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/kiev-merged.png"></a></div></p>
+<p>Переглянути для всіх міст можна тут:</p>
+<iframe  title="Інтерактивна карта з класифікованими зонами та об'єднаними дорогами" class="lazyload" data-src="https://aspectum.com/app/maps/embed/2351cf7d-e975-4a5d-b10a-b6c2776474da" width="960" height="600" frameborder="0" style="border: 0"></iframe>
+
+<h2 id="алгоритм-зі-згладжуванням-зон">Алгоритм зі згладжуванням зон</h2>
+<p>Деколи високе “засмічення” карти дорогами є небажаним результатом (наприклад візуально це погано сприймається).
+Для цього знову можна використати операцію з додаванням та відніманням буферу - для кожної зони ми спершу додаємо буфер, а потім віднімаємо.
+Але через важливість збереження основних ліній доріг (потрібно видалити лише сліпі дороги) алгоритм дещо ускладниться</p>
+<pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">compute_smoothed_zones</span><span class="hljs-params">(border, roads, railways, water_zones)</span>:</span>
+  smooth_city_zones_by_roads = make_smooth_zones(optimized_difference(border, roads))
+  other_zones_by_roads = optimized_difference(border, smooth_city_zones_by_roads)
+  smoothed_roads = optimized_intersection(roads, other_zones_by_roads)
+  roads_in_city = optimized_intersection(smoothed_roads, border)
+
+  smooth_city_zones_by_railways = make_smooth_zones(optimized_difference(border, railways))
+  other_zones_by_railways = optimized_difference(border, smooth_city_zones_by_railways)
+  smoothed_railways = optimized_intersection(railways, other_zones_by_railways)
+  railways_in_city = optimized_difference(smoothed_railways, smoothed_roads)
+
+  water_zones_in_city = optimized_intersection(water_zones, border)
+  water_zones_in_city = optimized_difference(water_zones_in_city, roads_in_city)
+  water_zones_in_city = optimized_difference(water_zones_in_city, railways_in_city)
+
+  smooth_city_zones = optimized_difference(border, smoothed_roads)
+  smooth_city_zones = optimized_difference(smooth_city_zones, smoothed_railways)
+  smooth_city_zones = optimized_difference(smooth_city_zones, water_zones)
+
+  features = multipolygon_to_features(roads_in_city, <span class="hljs-string">'roads'</span>)
+  features += multipolygon_to_features(railways_in_city, <span class="hljs-string">'railways'</span>)
+  features += multipolygon_to_features(water_zones_in_city, <span class="hljs-string">'water'</span>)
+  features += multipolygon_to_features(smooth_city_zones)
+
+  <span class="hljs-keyword">return</span> features</code></pre>
+<p>Як помітно з коду, появилась нова функція - make_smooth_zones.
+Саме вона і займається побудовою буферів і виправленням згенерованої геометрії (інколи зони накладаються одна на одну - і потрібно робити додаткове віднімання між полігонами зон аби утворити правильний мультиполігон)</p>
+<pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">make_smooth_zones</span><span class="hljs-params">(city_zones)</span>:</span>
+  zones_polygons = []
+  <span class="hljs-keyword">if</span> isinstance(city_zones, geometry.Polygon):
+    zones_polygons.append(city_zones)
+  <span class="hljs-keyword">else</span>:
+    <span class="hljs-keyword">for</span> poly <span class="hljs-keyword">in</span> city_zones.geoms:
+      zones_polygons.append(
+        poly
+        .buffer(merge_buffer_size, cap_style=<span class="hljs-number">3</span>, join_style=<span class="hljs-number">2</span>, mitre_limit=<span class="hljs-number">1</span>)
+        .buffer(-merge_buffer_size, cap_style=<span class="hljs-number">2</span>, join_style=<span class="hljs-number">2</span>, mitre_limit=<span class="hljs-number">1</span>)
+      )</code></pre>
+<p>Результат згладжування</p>
+<p><div class="lazyload" style="padding-bottom: 94.90695396669932%" data-bg="url(/assets/optimized-img/kiev.png)" title="Згладжені зони міста Київ"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/kiev.png"></a></div></p>
+<p>Роздивитись можна тут:</p>
+<iframe title="Інтерактивна карта зі згладженими класифікованими зонами" class="lazyload" data-src="https://aspectum.com/app/maps/embed/10da881d-136c-4c53-b83c-b22815a09ba7" width="960" height="600" frameborder="0" style="border: 0"></iframe>
+
+<h2 id="оптимізація-виконання-алгоритму">Оптимізація виконання алгоритму</h2>
+<p>Так як цей алгоритм виконує розмітку для міста, то логічно буде спробувати запустити його на декількох містах.
+А в тому щоб робити це синхронно нема ніякої необхідності - найпростіше буде просто запустити виконання для кожного міста в окремому потоці.</p>
+<p>Також велику частину обрахованої геометрії можна кешувати та зберігати на жорсткий диск, але потрібно враховувати те, що OSM постійно змінюється і про інвалідацію цього кешу забувати не треба.</p>
+<p>Ще одним місцем для оптимізації є інтерпретатор Python.
+Значна кількість обчислень в бібліотеці Shapely і так винесена в нативне розширення (основними операціями з геометрією займається бібліотека GEOS, яка написана на C++).
+Aле в нашому коді також є велика кількість обрахунків на стороні python.
+На щастя не так складно виявилось реалізувати компіляцію всього коду в нативне розширення за допомогою <a href="https://cython.org/" target="_blank" rel="noopener" >Cython</a>.</p>
+<h2 id="висновки">Висновки</h2>
+<p>Використання відкритих векторних даних може дати непоганий результат, але в процесі часто виникають проблеми з невалідною геометрією та нерівномірністю розмітки.
+В деяких задачах гостро встає проблема складності обрахунків і швидкодії.
+Але в цій статті я намагався показати, як з цими проблемами можна впоратись.</p>
+<p>Товариство OSM не стоїть на місці і постійно покращує свій продукт, що в свою чергу дозволяє на такому хорошому джерелі інформації проводити купу досліджень.
+Різноманітність даних OSM дозволяє максимально детально класифікувати сформовані зони в межах населених пунктів, що можна розглянути як глобальний Urban Atlas.</p>
+<p>Використання оглянутого підходу по сегментації не обмежується містами, а дозволяє формувати геометрії в будь-яких інших територіях з достатньо густою сіткою лінійної геометрії.</p>
+<p>Розвиток ресурсу OSM забезпечує все більшу користь від використання методу, що в подальшому може повністю замінити ручну роботу для класифікації супутникових знімків.</p>
+</main></div><footer>© Mikola Parfenyuck</footer><script src="/assets/js/bundle.js"></script></body></html>

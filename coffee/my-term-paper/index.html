@@ -1,0 +1,506 @@
+<!DOCTYPE html><html lang="en"><head><title>My term paper (Курсова робота) - @rapkin</title><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="ie=edge"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="yandex-verification" content="39324391851d1a5d"/><meta name="description" content="Курсова робота з дисципліни Бази даних. Розробка змійки на мові CoffeeScript з використанням бази даних MongoDB."/><link rel="stylesheet" href="/assets/css/site.css"/><link rel="preconnect" href="https://www.google-analytics.com"/><link rel="preconnect" href="http://fonts.googleapis.com"/></head><body><div class="top"><header role="banner"><a class="logo" href="/">@rapkin</a><span class="logo-details">Software developer</span><div class="menu-wrapper"><li><a class="menu-item" href="/resume">Resume</a></li><li><a class="menu-item" href="/about">About</a></li></div></header><main id="swup"><h1 class="page-title">My term paper (Курсова робота)</h1><p><a id="zmist"></a></p>
+<h2 id="зміст">Зміст</h2>
+<ul>
+<li><a href="#vstup"  >Вступ</a></li>
+<li><a href="#zavdannya"  >Завдання</a></li>
+<li><a href="#stek"  >Стек технологій</a><ul>
+<li><a href="#klient"  >Клієнтська частина</a></li>
+<li><a href="#server"  >Серверна частина</a></li>
+</ul>
+</li>
+<li><a href="#proektuvannya"  >Проектування структури бази даних</a><ul>
+<li><a href="#sutnosti_vidilennya"  >Виділення сутностей</a></li>
+<li><a href="#sutnosti_objednannya"  >Об&#39;єднання сутностей</a></li>
+<li><a href="#arhitectura"  >Загальний опис архітректури БД</a></li>
+</ul>
+</li>
+<li><a href="#realizacia"  >Реалізація</a><ul>
+<li><a href="#proektuvannya_api"  >Проектування API</a></li>
+<li><a href="#realizacia_servera"  >Реалізація серверної логіки</a></li>
+</ul>
+</li>
+<li><a href="#robota"  >Демонстрація роботи програми</a><ul>
+<li><a href="#instalacia"  >Процес інсталяції</a></li>
+<li><a href="#zapusk"  >Запуск програми</a></li>
+<li><a href="#vikoristannya"  >Використання програми</a></li>
+</ul>
+</li>
+<li><a href="#visnovok"  >Висновок</a></li>
+<li><a href="#literatura"  >Список використаної літератури</a></li>
+</ul>
+<p><i id="vstup"></i></p>
+<h2 id="вступ">Вступ</h2>
+<p>У своїй курсовій роботі я планую розробити базу даних для гри &quot;Змійка&quot;.
+Відповідно буде розроблено саму гру (хоча основний акцент робитиму на базі даних).</p>
+<p><div class="lazyload" style="padding-bottom: 100.70257611241217%" data-bg="url(/assets/optimized-img/game_page.png)" title="Змійка на coffeescript"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/game_page.png"></a></div></p>
+<p><strong>Актуальність проблеми</strong>.
+Розвиток технологій, а зокрема вебу, дозволив створювати повноцінні багатофункціональні додатки для веб-браузерів.
+Серед них особливе місце посідають ігри.
+Адже людям завжди цікаво грати у різноманітні ігри.
+І коли є можливість грати у вже звичному веб-переглядачі, звичайно, користувач віддасть перевагу саме такій грі (а не нативному аналогу).</p>
+<p>Завдання розробника полягає у створенні функціонального та повноцінного продукту.
+А у випадку гри, це має бути не лише зручний інтерфейс, а й великий об&#39;єм роботи з користувацькою інформацією на сервері (найпростішим прикладом є таблиця рекордів). І для створення таких ігор найкраще підходить веб.
+Значною перевагою браузерних ігор є можливість виконання на різних платформах. Таким чином гру можна запустити не лише на ПК, а й на планшеті чи смартфоні.</p>
+<p><strong>Мета.</strong> Отримати досвід розробки бази даних для онлайн-гри на прикладі гри &quot;Змійка&quot;.
+Розробити швидку та зручну у використанні базу даних.
+Ознайомитися з особливостями проектування API для взаємодії з базою даних.</p>
+<p><i id="zavdannya"></i></p>
+<h2 id="завдання">Завдання</h2>
+<p>Основним завданням у цій курсовій роботі є розробка самої бази даних.
+У моєму випадку це база даних, яка потрібна для функціонування досить простої гри &quot;Змійка&quot;.</p>
+<p>На перший погляд може здатися, що завдання є дуже простим, але насправді навіть для такої примітивної гри необхідна досить складна база даних.
+Список вимог до гри допоможе Вам у цьому переконатись:</p>
+<ul>
+<li>Динамічний сервер гри (який доступний онлайн)</li>
+<li>Широкий вибір рівнів для гри</li>
+<li>Зручний інтерфейс для вибору рівня</li>
+<li>Можливість швидко і легко створювати та налаштовувати нові рівні</li>
+<li>Зручна авторизація</li>
+<li>Збереження та обробка рекордів</li>
+<li>Можливість ділитися власними рівнями</li>
+<li>Можливість зіграти кілька рівнів навіть гостю (неавторизованому користувачу)</li>
+</ul>
+<p>Так як весь цей функціонал передбачає активну роботу з даними користувача (сюди відносяться і всі налаштування рівнів), то віповідно і структура самої бази даних обіцяє бути досить складною.</p>
+<p>Основні вимоги до бази даних:</p>
+<ul>
+<li>Висока продуктивність</li>
+<li>Зручність взаємодії</li>
+<li>Оптимізоване збереження рекордів</li>
+<li>Можливість швидко зробити вибірку необхідної інформації</li>
+<li>Збереження списку усіх рівнів (як вбудованих так і користувацьких)</li>
+<li>Збереження інформації про користувачів</li>
+</ul>
+<p>Як помітно, на базу даних накладається досить велика відповідальність.
+І аби організувати швидку роботу доведеться добре помізкувати.</p>
+<p><i id="stek"></i></p>
+<h2 id="стек-технологій">Стек технологій</h2>
+<p>В теперішніх умовах пріорітетною платформою для розробки є веб.
+Адже з розвитком телекомунікації та розповсюдженням інтернету, все більше і більше людей переходять до використання додатків у своєму веб-браузері.
+Відповідно і ринок потребує нових продуктів.
+Таким чином, зрозуміло, що розробка гри на платформі веб-браузера є дуже актуальною.</p>
+<p>Як і більшість веб-проектів мій проект складається з двох частин:</p>
+<ul>
+<li><strong>Клієнтська частина</strong></li>
+<li><strong>Серверна частина</strong></li>
+</ul>
+<p>Така організація проекту потребує детального розуміння усього стеку доступних у сучасному світі технологій.
+Сюди входять: технології доступні для розробки на клієнтській та серверній сторонах, а також протоколи та методи обміну даними між клієнтом та сервером.</p>
+<p><i id="klient"></i></p>
+<h3 id="клієнтська-частина">Клієнтська частина</h3>
+<p>Сюди входить весь клієнтський код.
+Це той код який буде відображатись безпосередньо для клієнта.
+Під клієнтом розуміється браузер користувача.
+З цього випливає, що мені будуть доступно тільки такі технології як:</p>
+<ul>
+<li><strong>HTML</strong> - для верстки</li>
+<li><strong>CSS</strong> - для оформлення</li>
+<li><strong>JavaScript</strong> - для написання всієї логіки гри</li>
+</ul>
+<p>Та з досвіду написання інших проектів я прийшов до висновку, що ці технології не володіють достатньою гнучкістю та можливостями.</p>
+<p>Справа в тому, що кожна технологія має свої вади.
+Наприклад в HTML відсутня модульність і взагалі неможливо організувати шаблонування.
+Також суттєвою вадою цієї мови розмітки є синтаксис (це суб&#39;єктивна позиція).</p>
+<p>Якщо брати до уваги CSS, то тут ті ж проблема модульності і синтаксису.
+Але в додачу отримуємо проблеми з вкладеністю селекторів, дублюванням коду і тд.</p>
+<p>А от у JavaScript отримуємо С-подібний синтаксис та відсутність підтримки звичних класів.
+І змиритись з цим я теж не зміг.
+Також основною з проблем є такзваний callback-hell.</p>
+<p>Насправні вище вказано лише деякі проблеми цих технологій.
+Але вже цей набір змушує задуматись над альтернативами.
+І звичайно таких альтернатив є надзвичайно багато.</p>
+<p>Так як основний шматок коду відведеться для опису логіки, тому спершу я вирішив обрати заміну для <strong>JavaScript</strong>.
+Тут мій вибір одразу впав на <strong>CoffeeScript</strong>.
+Це невелика мова програмування, яка компілюється в JavaScript.
+Основними її достойностями є:</p>
+<ul>
+<li>Чистий синтаксис (навіяний мовою Ruby)</li>
+<li>Надзвичайно велика кількість &quot;синтаксичного цукру&quot;</li>
+<li>Реалізація класичного ООП (класи, наслідування і тд)</li>
+<li>Компілювання в JS без втрати читаності коду</li>
+</ul>
+<p>Наступним претендентом на виліт став <strong>HTML</strong>.
+На його місце прийшов <strong>Jade</strong>.
+Його переваги:</p>
+<ul>
+<li>Чистий синтаксис (подібний до CoffeeScript)</li>
+<li>Доступні модульність, змінні, цикли, наслідування, умовні оператори і тд.</li>
+</ul>
+<p>Коли ж черга дійшла до <strong>CSS</strong>, я вирішив замінити його препроцесором <strong>Stylus</strong>.
+Це дало змогу:</p>
+<ul>
+<li>Використовувати чистий та зручний синтаксис</li>
+<li>Розбити стилі на модулі</li>
+<li>Використовувати змінні, функції та інше</li>
+<li>Зручно описувати вкладеність</li>
+</ul>
+<p>Що стосується сторонніх бібліотек, то я прийняв рішення не використовувати їх.
+Причини є досить простими:</p>
+<ul>
+<li>Висока швидкість завантаження сторінки</li>
+<li>Швидке виконання коду</li>
+<li>Мала кількість місць можливого застосування</li>
+</ul>
+<p>На клієнтській стороні також необхідно організувати взаємодію з сервером.
+І тут для розробників доступний зручний спосіб взаємодії - <strong>AJAX</strong>.
+У браузері цей метод взаємодії можна реалізувати з допомогою доступного інтерфейсу <strong>XMLHttpRequest</strong>.
+Особливість цього методу полягає у можливості взаємодіяти з сервером асинхронно та без перезавантаження сторінки.</p>
+<p><i id="server"></i></p>
+<h3 id="серверна-частина">Серверна частина</h3>
+<p>В області технологій, які доступні на сервері взагалі можна заблукати.
+Але тут на допомогу мені прийшли тренди, які актуальні серед веб-розробників.
+Останнім часом високої популярності набула платформа <strong>Node.js</strong>.
+Ця платформа дозволяє писати серверний код на JavaScript (що само по собі є досить привабливо).
+Та у моєму випадку на заміну JS приходить CoffeeScript.</p>
+<p>Варто зазначити, що Node.js є досить дружелюбною та зручною платформою.
+Адже тут (на відміну від браузера) з&#39;явився дуже зручний менеджер пакетів, вирішено проблему модульності, додано можливість повноцінної роботи з файловою системою та інші системні функції притаманні для мови програмування загального призначення.</p>
+<p>Для написання самого сервера за основу було взято міні-фреймворк Express.js.
+Він надає чудові можливості для написання API.
+Також присутні зручні інтеграції з популярними шаблонізаторами та бібліотеками.</p>
+<p>Системою керування базами даних було обрано <strong>MongoDB</strong>.
+Причин обрати саме її є дуже багато. Вирішаючими стали:</p>
+<ul>
+<li>Пряма і повна підтримка нативних JS-об&#39;єктів (у вигляді <strong>JSON</strong>)</li>
+<li>Висока продуктивність та легка розширюваність</li>
+<li>Надзвичайно зручний принцип взаємодії з базою даних</li>
+</ul>
+<p>Використання цієї СУБД дозволило позбутись зайвої абстракції у вигляді SQL.
+Відпала необхідність описувати схеми таблиць і тд.
+В умовах платформи Node.js використання MongoDB є найлогічнішим. Адже можна просто зберігати об&#39;єкти у БД так як вони є у програмі (JSON - об&#39;єкти).</p>
+<p>Отож завдання сервера:</p>
+<ul>
+<li>Робота з БД</li>
+<li>Компілювання та віддача клієнтського коду<ul>
+<li>Обробка шаблонів</li>
+<li>API (прикладний програмний інтерфейс)</li>
+</ul>
+</li>
+</ul>
+<p>Для того аби автоматизувати процес збірки проекту я обрав <strong>Gulp.js</strong>.
+Він займатиметься:</p>
+<ul>
+<li>Динамічною компіляцією JS-коду гри</li>
+<li>Слідкування за змінами у файлах проекту</li>
+<li>Перезавантаження клієнта або сервера при відповідних змінах</li>
+<li>Оптимізацією та мініфікацією клієнтського коду</li>
+</ul>
+<p><i id="proektuvannya"></i></p>
+<h2 id="проектування-структури-бази-даних">Проектування структури бази даних</h2>
+<p>Для оптимального збереження інформації у базі даних необхідно провести розподіл сутностей за значенням.
+Це дозволить утворити прозору структуру збереження інформації та виділити зв&#39;язки між даними.</p>
+<p>Аби забезпечити швидку та зручну взаємодію з БД потрібно детально продумати її структуру.
+Це дозволить уникнути різноманітних проблем у подальшому.</p>
+<p>На початковому етапі потрібно визначити та виділити основні сутності з якими необхідно взаємодіяти у базі даних.</p>
+<p>У зв&#39;язку з використанням такої СКБД як MongoDB усі сутності називаються <strong>колекціями</strong> (аналог таблиць), а записи у цих колекціях називаються <strong>об&#39;єктами</strong>.
+Простими словами колекція - це набір об&#39;єктів, які можна об&#39;єднати за певною суттю.
+Важливо зазначити, що дотримуватись жорсткої типізації у MongoDB не потрібно, тому і сказати, що кожен об&#39;єкт обов&#39;язково матиме певний набір полів теж не можна.</p>
+<p><i id="sutnosti_vidilennya"></i></p>
+<h3 id="виділення-сутностей">Виділення сутностей</h3>
+<p>Так як у моїй грі передбачається активна робота з даними користувача, то доречним буде виділити окрему колекцію, яка буде займатись обробкою та збереженням цих даних.
+Зберігатиметься ця інформація у колекції <strong>&quot;Користувачі&quot;</strong>.</p>
+<p>Наступним видом даних є таблиця рекордів.
+Вона буде зберігатись у колекції <strong>&quot;Рекорди&quot;</strong>.
+У цій колекції зберігається список рекордів усіх користувачів.</p>
+<p>Ще одним видом даних є рівні, які зберігатимуться у колекціх <strong>&quot;Рівні&quot;</strong>.
+Тут зберігатимуться як рівні якористувачів (створені самими користувачами) так і базові рівні (які доступні всім користувачам). Рівнем являється набір налаштувань для гри (таких як висота та ширина карти і тд).</p>
+<p><i id="sutnosti_objednannya"></i></p>
+<h3 id="обєднання-сутностей">Об&#39;єднання сутностей</h3>
+<p>Тепер можна приступити до утворення зв&#39;язків між сутностями.
+Одразу можна виділити такі зв&#39;язки &quot;Користувач &lt;-- Рекорд --&gt; Рівень&quot;, &quot;Користувач &lt;-- Рівень&quot;.</p>
+<p>Інформація у колекції &quot;Рекорди&quot; пов&#39;язана з інформацією у колекції &quot;Користувачі&quot; (це зв&#39;язок багато до одного) та з таблицею &quot;Рівні&quot; (однин до одного).
+Це означає, що кожен рекорд належить певному користувачу (користувач може мати список з кількох рекордів, які встановлені на різних рівнях).
+Кожен запис міститиме посилання на користувача (який встановив рекорд), посилання на рівень (на якому було встановлено), саме значення рекорду та час його встановлення.</p>
+<p>Як і у випадку з рекордами у колекції &quot;Рівні&quot; є зв&#39;язок з даними користувача, адже кожен користувач може створювати свої рівні.
+Але додатковим ускладненням є те, що користувачі можуть ділитись своїми рівнями.</p>
+<p><i id="arhitectura"></i></p>
+<h3 id="загальний-опис-архітректури-бд">Загальний опис архітректури БД</h3>
+<p>На основі попередніх кроків можна описати набір усіх сутностей, полів та зв&#39;язків між ними.
+Отриману базу даних можна зобразити так:</p>
+<p><strong>Користувачі</strong></p>
+<ul>
+<li>ID</li>
+<li>Ім&#39;я</li>
+<li>Пароль</li>
+<li>Час реєстрації</li>
+</ul>
+<p><strong>Рівні</strong></p>
+<ul>
+<li>ID</li>
+<li>Назва</li>
+<li>ID власника</li>
+<li>{налаштування}</li>
+</ul>
+<p><strong>Рекорди</strong></p>
+<ul>
+<li>ID</li>
+<li>Значення</li>
+<li>ID власника</li>
+<li>ID рівня</li>
+<li>Час встановлення</li>
+</ul>
+<p><i id="realizacia"></i></p>
+<h2 id="реалізація">Реалізація</h2>
+<p>Маючи повністю спроектовану базу даних, можна приступити до реалізації серверної логіки.</p>
+<p>Потрібно зауважити, що саму гру уже написано.
+У ній вже реалізовано всі необхідні функції за виключенням усієї логіки що стосується взаємодії з сервером.</p>
+<p>За цих умов можна приступити до створення сервера.
+До завершення роботи над клієнтом можна повернутись тільки після готової реалізації API.</p>
+<p><i id="proektuvannya_api"></i></p>
+<h3 id="проектування-api">Проектування API</h3>
+<p>Першим кроком буде проектування API, для взаємодії з клієнтом.
+<strong>API</strong> (Application Programming Interface) є інтерфейсом, за допомогою якого, у випадку клієнт-серверних застосунків, можна реалізувати методи взаємодії між клієнтом та сервером.
+Це дозволяє логічно розділити та упорядковати передавання та отримання даних.</p>
+<p>Виходячи з поставленої задачі, API, який надається сервером клієнту, повинен включати методи:</p>
+<ul>
+<li>Для авторизації користувача (реєстрація, вхід та вихід з системи)</li>
+<li>Створення, видалення та збереження рівнів</li>
+<li>Виведення переліку доступних рівнів</li>
+<li>Збереження та вивід рекордів</li>
+</ul>
+<p><i id="realizacia_servera"></i></p>
+<h3 id="реалізація-серверної-логіки">Реалізація серверної логіки</h3>
+<p>Розпочнемо з <strong>авторизації</strong>.
+Спершу потрібно написати функцію, яка <strong>зберігатиме користувача</strong> в базі даних:</p>
+<pre><code data-lang="coffeescript" class="hljs"><span class="hljs-function"><span class="hljs-title">save_user</span> = <span class="hljs-params">(name, pass)</span> -&gt;</span>
+  time = Date.now()
+  db.users.save
+    name: name
+    pass: pass_hash(pass, time)
+    time: time</code></pre>
+<p>Ця функція приймає ім&#39;я та пароль нового користувача.
+Виконує збереження у колекції <code>users</code> об&#39;єкту, яки містить ім&#39;я користувача, пароль у захищеному вигляді та час реєстрації.</p>
+<p>У випадку використання SQL бази даних, розмір коду був би набагато більший.
+Додатково потрібно створювати нову таблицю:</p>
+<pre><code data-lang="sql" class="hljs"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-keyword">IF</span> <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">EXISTS</span> <span class="hljs-keyword">users</span> (
+  <span class="hljs-keyword">id</span> <span class="hljs-built_in">int</span> <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> AUTO_INCREMENT,
+  <span class="hljs-keyword">name</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">530</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> <span class="hljs-keyword">UNIQUE</span>,
+  <span class="hljs-keyword">password</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">42</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
+  <span class="hljs-built_in">time</span> <span class="hljs-built_in">int</span> <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
+  PRIMARY <span class="hljs-keyword">KEY</span> (<span class="hljs-keyword">id</span>)
+) <span class="hljs-keyword">DEFAULT</span> <span class="hljs-built_in">CHARACTER</span> <span class="hljs-keyword">SET</span> utf8 <span class="hljs-keyword">COLLATE</span> utf8_general_ci</code></pre>
+<p>А сам запит до БД виглядав би приблизно так:</p>
+<pre><code data-lang="sql" class="hljs"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> <span class="hljs-keyword">users</span> <span class="hljs-keyword">VALUES</span> (
+  <span class="hljs-literal">NULL</span>,
+  <span class="hljs-string">"name"</span>,
+  <span class="hljs-string">"password"</span>,
+  <span class="hljs-string">"time"</span>
+)</code></pre>
+<p>Тут і проявляється вся зручність MongoDB.</p>
+<p>Тепер можна створити функцію, яка займається обробкою переданих через API параметрів:</p>
+<pre><code data-lang="coffeescript" class="hljs">app.post <span class="hljs-string">'/register'</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
+  regex = <span class="hljs-regexp">/^[a-z0-9_]{3,42}$/</span>
+  name = req.body.name.trim()
+  pass = req.body.pass.trim()
+
+  <span class="hljs-keyword">if</span> name.match(regex) <span class="hljs-keyword">and</span> pass.match(regex)
+    db.users.findOne {name: name}, <span class="hljs-function"><span class="hljs-params">(user)</span> -&gt;</span>
+      <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> user?
+        save_user name, pass
+        res.cookie <span class="hljs-string">'snake_user_name'</span>, name
+        res.redirect <span class="hljs-string">'/'</span>
+      <span class="hljs-keyword">else</span> res.redirect <span class="hljs-string">'/register'</span>
+  <span class="hljs-keyword">else</span> res.redirect <span class="hljs-string">'/register'</span></code></pre>
+<p>Тут отримані параметри було перевірено на валідність, далі йде перевірка чи ім&#39;я цього користувача ще не зайняте (існує у базі даних) і тільки після цього користувач зберігається у базі даних.</p>
+<p>Коли користувач зареєстрований необхідно передбачити <strong>вхід</strong>.</p>
+<pre><code data-lang="coffeescript" class="hljs">app.post <span class="hljs-string">'/login'</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
+  name = req.body.name.trim()
+  pass = req.body.pass.trim()
+
+  db.users.findOne {name: name}, <span class="hljs-function"><span class="hljs-params">(user)</span> -&gt;</span>
+    <span class="hljs-keyword">if</span> user.pass <span class="hljs-keyword">is</span> pass_hash(pass, user.time)
+      res.cookie <span class="hljs-string">'snake_user_name'</span>, name
+      res.redirect <span class="hljs-string">'/'</span>
+    <span class="hljs-keyword">else</span> res.redirect <span class="hljs-string">'/login'</span></code></pre>
+<p>Де перевіряємо на наявність у базі даних пари імені та пароля.
+І тільки тоді надаємо доступ.</p>
+<p>Функція виходу дуже проста:</p>
+<pre><code data-lang="coffeescript" class="hljs">app.get <span class="hljs-string">'/logout'</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
+  res.clearCookie <span class="hljs-string">'snake_user_name'</span>
+  res.redirect <span class="hljs-string">'/'</span></code></pre>
+<p>З автентифікацією завершено, можна перейти до <strong>додавання рівнів</strong>.</p>
+<pre><code data-lang="coffeescript" class="hljs"><span class="hljs-function"><span class="hljs-title">save_level</span> = <span class="hljs-params">(level, user_name, lvl_name, cur_user = user_name)</span> -&gt;</span>
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">if</span> user_name <span class="hljs-keyword">isnt</span> cur_user
+  db.users.findOne {name: user_name}, <span class="hljs-function"><span class="hljs-params">(user)</span> -&gt;</span>
+    db.levels.findOne {name: lvl_name, uid: user._id}, <span class="hljs-function"><span class="hljs-params">(lvl)</span> -&gt;</span>
+      level._id = lvl._id <span class="hljs-keyword">if</span> lvl
+      level.name = lvl_name
+      level.uid = user._id
+      db.levels.save level</code></pre>
+<p>Функція збереже переданий рівень в БД.
+Особливим є те, що можна як додавати нові рівні, так і зберігати наявні.</p>
+<p>На прикладі цієї функції можна обгрунтувати недоліки JavaScript, адже на цій мові аналог виглядатиме так:</p>
+<pre><code data-lang="javascript" class="hljs"><span class="hljs-keyword">var</span> save_level = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">level, user_name, lvl_name, cur_user</span>) </span>{
+  <span class="hljs-keyword">if</span> (cur_user == <span class="hljs-literal">null</span>) {
+    cur_user = user_name;
+  }
+  <span class="hljs-keyword">if</span> (user_name !== cur_user) {
+    <span class="hljs-keyword">return</span>;
+  }
+  db.users.findOne({ <span class="hljs-attr">name</span>: user_name }, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">user</span>) </span>{
+    db.levels.findOne(
+      {
+        <span class="hljs-attr">name</span>: lvl_name,
+        <span class="hljs-attr">uid</span>: user._id
+      },
+      <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">lvl</span>) </span>{
+        <span class="hljs-keyword">if</span> (lvl) {
+          level._id = lvl._id;
+        }
+        level.name = lvl_name;
+        level.uid = user._id;
+        db.levels.save(level);
+      }
+    );
+  });
+};</code></pre>
+<p>Виглядає досить монструозно і читається на порядок важче.
+А вкінці і проявився callback-hell.</p>
+<p>Тепер потрібно передбачити обробники обох ситуацій.
+Для <strong>додавання рівня</strong> є обробник:</p>
+<pre><code data-lang="coffeescript" class="hljs">app.post <span class="hljs-string">'/new_level'</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
+  lvl_name = req.body.name.trim()
+  <span class="hljs-keyword">if</span> lvl_name.match(<span class="hljs-regexp">/^[a-z0-9_]{1,23}$/</span>)
+    save_level get_lvl_from_file(<span class="hljs-number">1</span>), user, lvl_name, user</code></pre>
+<p>Для <strong>збереження існуючого рівня</strong>:</p>
+<pre><code data-lang="coffeescript" class="hljs">app.post <span class="hljs-string">'/save_level/:user/:level'</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
+  user = req.cookies.snake_user_name <span class="hljs-keyword">or</span> <span class="hljs-string">'default'</span>
+  level = req.body
+  <span class="hljs-keyword">if</span> user <span class="hljs-keyword">isnt</span> <span class="hljs-string">'default'</span>
+    save_level level, req.params.user, req.params.level, user</code></pre>
+<p>Коли є рівні, а їх може бути багато, потрібно подумати як виводити їх список.
+<strong>Список усіх рівнів</strong> буде виводитись на початковому екрані.
+І відповідно обробник виглядатиме так:</p>
+<pre><code data-lang="coffeescript" class="hljs">app.get <span class="hljs-string">'/'</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
+  name = req.cookies.snake_user_name <span class="hljs-keyword">or</span> <span class="hljs-string">'default'</span>
+  db.users.findOne {name: name}, <span class="hljs-function"><span class="hljs-params">(user)</span> -&gt;</span>
+    db.levels.find(uid: user._id).sort {name: <span class="hljs-number">1</span>}, <span class="hljs-function"><span class="hljs-params">(levels)</span> -&gt;</span>
+      names = <span class="hljs-keyword">for</span> lvl <span class="hljs-keyword">in</span> levels <span class="hljs-keyword">then</span> lvl.name
+      res.render <span class="hljs-string">'levels'</span>, levels: names, user: name</code></pre>
+<p>По цьому списку можна перейти на якийсь окремий рівень.
+Для <strong>відображення рівня</strong> є обробник:</p>
+<pre><code data-lang="coffeescript" class="hljs">app.get <span class="hljs-string">'/:user/:level'</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
+  user_name = req.cookies.snake_user_name <span class="hljs-keyword">or</span> <span class="hljs-string">'default'</span>
+  level = req.params.level
+  db.users.findOne {name: req.params.user}, <span class="hljs-function"><span class="hljs-params">(user)</span> -&gt;</span>
+    db.levels.findOne {name: level, uid: user._id}, <span class="hljs-function"><span class="hljs-params">(lvl)</span> -&gt;</span>
+      res.render <span class="hljs-string">'game'</span>, lvl <span class="hljs-keyword">if</span> lvl?</code></pre>
+<p>Рівень є, користувач є, залишилась робота з рекордами.
+Так <strong>зберігаємо рекорд</strong> (для заданого користувача на заданому рівні):</p>
+<pre><code data-lang="coffeescript" class="hljs"><span class="hljs-function"><span class="hljs-title">save_score</span> = <span class="hljs-params">(score, user_name, lvl_name)</span> -&gt;</span>
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">if</span> user_name <span class="hljs-keyword">is</span> <span class="hljs-string">'default'</span>
+  db.users.findOne {name: user_name}, <span class="hljs-function"><span class="hljs-params">(user)</span> -&gt;</span>
+    db.levels.findOne {name: lvl_name, uid: user._id}, <span class="hljs-function"><span class="hljs-params">(lvl)</span> -&gt;</span>
+      db.scores.findOne {uid: user._id, lid: lvl._id}, <span class="hljs-function"><span class="hljs-params">(last_score)</span> -&gt;</span>
+        <span class="hljs-keyword">if</span> last_score?
+          <span class="hljs-keyword">return</span> <span class="hljs-keyword">if</span> last_score.value &gt; score.value
+          score.uid = user._id
+          score.lid = lvl._id
+          score._id = last_score._id
+        score.time = Date.now()
+        db.scores.save score</code></pre>
+<p>І невеличкий обробник:</p>
+<pre><code data-lang="coffeescript" class="hljs">app.post <span class="hljs-string">'/save_score/:user/:level'</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
+  score = req.body
+  save_score score, req.params.user, req.params.level</code></pre>
+<p>Ну і останнім є <strong>видалення рівня</strong>.
+Так його можна видалити:</p>
+<pre><code data-lang="coffeescript" class="hljs">app.get <span class="hljs-string">'/delete_level/:user/:name'</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">if</span> req.params.user <span class="hljs-keyword">is</span> <span class="hljs-string">'default'</span>
+  db.users.findOne {name: req.params.user}, <span class="hljs-function"><span class="hljs-params">(user)</span> -&gt;</span>
+    db.levels.findOne {uid: user._id, name: req.params.name}, <span class="hljs-function"><span class="hljs-params">(lvl)</span> -&gt;</span>
+      db.scores.remove {lid: lvl._id}
+      db.levels.remove {_id: lvl._id}</code></pre>
+<p>Крім рівня потрібно видалити і всі рекорди, які до нього прив&#39;язані.</p>
+<p>На цьому розробка серверної частини і завершилась.
+Звичайно, на прикладах наведено лише схематичний код. Насправді, аби забезпечити стабільну роботу програми, необхідно передбачати багато помилок та некоректностей.</p>
+<p>Також опущено велику частину, яка займається будуванням самої сторінки.
+Можу лише сказати, що мені вдалось з допомогою шаблонізатора Jade і препроцесора Stylus відділити клієнтський код від серверного, що дуже спростило читання та розуміння серверної логіки.</p>
+<p>Повний початковий код програми доступний публічно і розповсюджується як <strong>OpenSource</strong> (ліцензія MIT).
+Тому завжди можна ознайомитись з всією структурою проекту. А проект є досить об&#39;ємним.
+І навіть з використанням мого стеку технологій, його розмір сягає приблизно півтори тисячі рядків.
+Тому зрозуміло, що весь код програми приводити в курсовій роботі просто недоцільно.</p>
+<p><i id="robota"></i></p>
+<h2 id="демонстрація-роботи-програми">Демонстрація роботи програми</h2>
+<p>Звичайно, будь-яка програма спершу має якось інсталюватись на робочій машині.
+У випадку мого додатку, його інсталяція необхідна лише на одному сервері, а всі інші (клієнти) можуть повноцінно нею користуватись з допомогою веб-переглядача.
+Не є обов&#39;язковим наявність інтернету, адже сервер можна запустити локально, а клієнти локальної мережі спокійно можуть до нього під&#39;єднатись.</p>
+<p>У цьому розділі я постараюсь вичерпно описати весь процес використання програми, яки складається з встановлення, запустку та самого використання.</p>
+<p><i id="instalacia"></i></p>
+<h3 id="процес-інсталяції">Процес інсталяції</h3>
+<p>Для серверів та й взагалі у більшості випадків, для встановлення подібного програмного забезпечення потрібно активно користуватись командним рядком (далі термінал).
+Як вже було зазначено, вихідний код моєї програми вільно розповсюджуєтья. Репозиторій програми знаходиться на сайті GitHub.
+В репозиторії також скорочено описано процес встановлення.</p>
+<p>Оскільки мій додаток працює на платформі Node.js, то відповідно на сервері повинно бути встановлене це програмне забезпечення.
+Завантажити інсталятор і ознайомитись з процесом встановлення можна на офіційному сайті Node.js.</p>
+<p>Далі необхідно встановити програмне забезпечення для СУБД MongoDB.
+Аналогічно, вся інформація та інсталятор знаходяться на офіційному сайті MongoDB.</p>
+<p>Також на комп&#39;ютері має бути встановлена система контролю версій <strong>GIT</strong>, адже саме її я використовую у своєму проекті. Знову ж таки знайти інформацію, як її встановити не складає ніяких проблем, для цього достатньо скористатись пошуком в інтернеті.</p>
+<p>Після успішного встановлення цих продуктів перейдемо до встановлення мого додатку.
+Спершу потрібно відкрити вікно термінала і перейти в папку де можна створити проект.
+Далі виконаємо команду, яка завантажить з репозиторію на GitHub весь вихідний код:</p>
+<pre><code data-lang="bash" class="hljs">$ git <span class="hljs-built_in">clone</span> https://github.com/rapkin/snake</code></pre>
+<p>В поточній папці має з&#39;явитись нова папка під назвою <code>snake</code>, потрібно перейти в неї.
+Далі потрібно завантажити залежності до проекту, зробити це надзвичайно просто
+, потрібно лише виконати дві команди:</p>
+<pre><code data-lang="bash" class="hljs">$ npm install
+$ npm install -g gulp coffee-script</code></pre>
+<p>На цьому весь процес встановлення завершено. Як виявилось, це не так вже й складно.</p>
+<p><i id="zapusk"></i></p>
+<h3 id="запуск-програми">Запуск програми</h3>
+<p>Аби запустити програму, сервер баз даних MongoDB вже має бути запущено.</p>
+<p>У моєму проекті доступно два види середовищ запуску, які призначені для:</p>
+<ul>
+<li>Процесу розробки (на локальній машині розробника)</li>
+<li>Запуску на сервері</li>
+</ul>
+<p>Для зручності та автоматизації розробки я використовую Gulp.js.
+І на машині розробника запуск відбувається з допомогою однієї команди:</p>
+<pre><code data-lang="bash" class="hljs">$ gulp</code></pre>
+<p>Це розпочне процес збирання проекту і автоматично запустить локальний сервер програми.</p>
+<p>Після запуску можна спокійно відкривати проект у редакторі та вносити зміни в код.
+В процесі написання та збереження коду, зміни будуть автоматично відслідковуватись і відбуватиметься перезавантаження сторінки або цілого сервера (якщо у його коді відбудуться зміни).</p>
+<p>У випадку запуску на сервері потрібно виконати команду</p>
+<pre><code data-lang="bash" class="hljs">$ coffee server</code></pre>
+<p>Це просто запустить сервер гри (ніякого процесу збирання не відбуватиметься).</p>
+<p><i id="vikoristannya"></i></p>
+<h3 id="використання-програми">Використання програми</h3>
+<p>Коли сервер запущено можна перейти на сторінку з грою (по замовчуванню за адресою <code>localhost:4242</code>). І першою буде сторінка з переліком рівнів, які доступні гостю.</p>
+<p><div class="lazyload" style="padding-bottom: 100.70257611241217%" data-bg="url(/assets/optimized-img/root_guest.png)" title="Перелік рівнів гостя"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/root_guest.png"></a></div></p>
+<p>Можна спробувати пограти у гру на базових рівнях, але при перезавантаженні сторінки рекорди буде втрачено, а якщо було відредаговано рівень, зберегти його у базі даних не вдасться.
+Так виглядає сторінка з грою:</p>
+<p><div class="lazyload" style="padding-bottom: 100.70257611241217%" data-bg="url(/assets/optimized-img/game_page.png)" title="Сторінка з грою"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/game_page.png"></a></div></p>
+<p>Аби отримати доступ до вказаних функцій необхідно пройти авторизацію (реєстрацію у випадку відсутності аккаунту, або вхід).
+Для входу потрібно натиснути кнопку <code>LOGIN</code>, після чого користувач потрапить на сторінку з формою входу.</p>
+<p><div class="lazyload" style="padding-bottom: 100.70257611241217%" data-bg="url(/assets/optimized-img/login_page.png)" title="Сторінка входу"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/login_page.png"></a></div></p>
+<p>Після введення та відправки логіна та пароля, при успішному вході, користувач потрапить на сторінку зі списком його рівнів</p>
+<p><div class="lazyload" style="padding-bottom: 100.70257611241217%" data-bg="url(/assets/optimized-img/root_user.png)" title="Перелік рівнів користувача"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/root_user.png"></a></div></p>
+<p>Тут появилась можливість видалити будь-який рівень, або додати новий.
+Аби додати новий, потрібно натиснути велику зелену кнопку з плюсом.
+Після цього користувач портапляє на сторінку з формою для вводу назви рівня.</p>
+<p><div class="lazyload" style="padding-bottom: 100.70257611241217%" data-bg="url(/assets/optimized-img/new_level.png)" title="Створення нового рівня"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/new_level.png"></a></div></p>
+<p>Після відправки форми в списку рівні появиться новий рівень (з вказаною назвою).
+Користувач може почати гру на цьому рівні, відредагувати його, або видалити.
+Також його рекорди на кожному з рівнів зберігаються у базі даних.</p>
+<p>Думаю на цьому огляд роботи програми можна завершити.</p>
+<p><i id="visnovok"></i></p>
+<h2 id="висновок">Висновок</h2>
+<p>Розробка гри та й бази даних для неї виявилась дуже захоплючим процесом.
+Під час роботи над своєю курсовою роботою мені вдалось ознайомитись та активно попрацювати з набором чудових технологій.
+А написання деяких частин програми (особливо самої гри) власноруч виявилось непоганою розминкою для мозку.</p>
+<p>У своїй курсовій роботі я намагався зробити акцент на сучасних тенденція та трендах у світі розробки.
+В процесі розробки мені довелось активно ознайомлюватись та обирати підходящий інструмент з великого переліку доступних (як виявилось це теж досить складне завдання).</p>
+<p>Не менш важливим є досвід проектування архітектури повноцінного додатку.
+Адже мало вміти писати код.
+Як показує досвід інших розробників значну частину процесу розробки відводиться на проектування архітектури.
+І це дуже важливо, адже погане проектування приводить до нестерпних наслідків та подальшого переписування та перепроектування (що звичайно ж краде набагато більше часу та зусиль).</p>
+<p><i id="literatura"></i></p>
+<h2 id="список-використаної-літератури">Список використаної літератури</h2>
+<ol>
+<li>Офіційна документація до СУБД <strong>MongoDB</strong> - <a href="http://docs.mongodb.org/manual/" target="_blank" rel="noopener" >http://docs.mongodb.org/manual/</a></li>
+<li>Офіційна документація по <strong>Node.js</strong> - <a href="https://nodejs.org/api/" target="_blank" rel="noopener" >https://nodejs.org/api/</a></li>
+<li>Офіційна документація мови <strong>CoffeeScript</strong> - <a href="http://coffeescript.org/" target="_blank" rel="noopener" >http://coffeescript.org/</a></li>
+<li>Документація до неофіційного драйверу MongoDB для Node.js (<strong>Mongojs</strong>) - <a href="https://github.com/mafintosh/mongojs" target="_blank" rel="noopener" >https://github.com/mafintosh/mongojs</a></li>
+<li>Офіційна документація до бібліотеки <strong>Express.js</strong> - <a href="http://expressjs.com/4x/api.html" target="_blank" rel="noopener" >http://expressjs.com/4x/api.html</a></li>
+<li>Офіційна документація по шаблонізатору <strong>Jade</strong> - <a href="http://jade-lang.com/reference/" target="_blank" rel="noopener" >http://jade-lang.com/reference/</a></li>
+<li>Офіційна документація до препроцесора <strong>Stylus</strong> - <a href="http://learnboost.github.io/stylus/" target="_blank" rel="noopener" >http://learnboost.github.io/stylus/</a></li>
+</ol>
+</main></div><footer>© Mikola Parfenyuck</footer><script src="/assets/js/bundle.js"></script></body></html>
