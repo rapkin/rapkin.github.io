@@ -66,8 +66,8 @@
 <p>Варто зазначити, що в деяких місцях порядок не обов&#39;язковий і є можливість асинхронно виконувати якісь завдання (наприклад завантаження інформації, або робота з кожним класом геометрії).</p>
 <p>Тепер можна детальніше привести приклади коду для кожного пункту.</p>
 <h2 id="завантаження-даних-з-osm">Завантаження даних з OSM</h2>
-<p>Не зміг знайти хорошої бібліотеки аби відпарсити дані OSM (якщо я погано шукав, то поділіться такою бібліотекою в коментарях), тому щоб сформувати з набору XML даних якусь геометрію я написав бібліотеку <a href="https://github.com/aspectumapp/osm2geojson" target="_blank" rel="noopener" >osm2geojson</a>, яка б перетворила OSM/Overpass XML в геометрію.
-До речі, для роботи з Overpass JSON там теж є функції.</p>
+<p>Не зміг знайти хорошої бібліотеки аби відпарсити дані OSM (якщо я погано шукав, то поділіться такою бібліотекою в коментарях), тому щоб сформувати необхідну геометрію я написав бібліотеку <a href="https://github.com/aspectumapp/osm2geojson" target="_blank" rel="noopener" >osm2geojson</a>, яка перетворює OSM/Overpass XML в геометрію Shapely або GeoJSON.
+Звичайно, можна скористатись бібліотекою GDAL, але процес встановлення занадто складний. </p>
 <p>Отож отримати межу міста можна простим запитом до API Overpass:</p>
 <pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_city_border</span><span class="hljs-params">(city_id)</span>:</span>
   data = overpass_call(<span class="hljs-string">f"""
@@ -355,7 +355,17 @@
         poly
         .buffer(merge_buffer_size, cap_style=<span class="hljs-number">3</span>, join_style=<span class="hljs-number">2</span>, mitre_limit=<span class="hljs-number">1</span>)
         .buffer(-merge_buffer_size, cap_style=<span class="hljs-number">2</span>, join_style=<span class="hljs-number">2</span>, mitre_limit=<span class="hljs-number">1</span>)
-      )</code></pre>
+      )
+
+  zonesTree = STRtree(zones_polygons)
+  <span class="hljs-keyword">for</span> idx, zone <span class="hljs-keyword">in</span> enumerate(zones_polygons):
+    found = zonesTree.query(zone)
+    <span class="hljs-keyword">for</span> z <span class="hljs-keyword">in</span> found:
+      <span class="hljs-keyword">if</span> zone.intersects(z):
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> z <span class="hljs-keyword">is</span> zone <span class="hljs-keyword">and</span> zone.intersection(z).area &gt; <span class="hljs-number">0</span>:
+          zones_polygons[idx] = zone.difference(z.buffer(<span class="hljs-number">0.000001</span>, cap_style=<span class="hljs-number">2</span>, join_style=<span class="hljs-number">2</span>, mitre_limit=<span class="hljs-number">1</span>))
+
+  <span class="hljs-keyword">return</span> geometry.MultiPolygon(zones_polygons)</code></pre>
 <p>Результат згладжування</p>
 <p><div class="lazyload" style="padding-bottom: 94.90695396669932%" data-bg="url(/assets/optimized-img/kiev.png)" title="Згладжені зони міста Київ"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/kiev.png"></a></div></p>
 <p>Роздивитись можна тут:</p>
