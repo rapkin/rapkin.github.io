@@ -1,4 +1,8 @@
-<!DOCTYPE html><html lang="en"><head><title>Сегментація міст з використанням дорожньої сітки на основі відкритих супутникових даних - @rapkin</title><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="ie=edge"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="yandex-verification" content="39324391851d1a5d"/><meta name="google-site-verification" content="pnATuZP_aTcMjckmXnh2j6oO8Mk9YXUA7GfE7UO4QXk"/><link rel="stylesheet" href="/assets/css/site.css"/><meta property="og:type" content="article"/><meta property="og:site_name" content="@rapkin | Software developer"/><meta itemProp="name" content="Сегментація міст з використанням дорожньої сітки на основі відкритих супутникових даних"/><meta name="author" content="Mikola Parfenyuck"/><meta property="article:author" content="Mikola Parfenyuck"/><meta name="twitter:card" content="summary"/><meta name="twitter:site" content="@i_rapkin"/><meta name="description" content="Master paper"/><meta itemProp="description" content="Master paper"/><meta property="og:description" content="Master paper"/><meta name="twitter:description" content="Master paper"/><meta name="google" content="nositelinkssearchbox"/><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"/><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"/><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"/><link rel="manifest" href="/site.webmanifest"/><link rel="preconnect" href="https://www.google-analytics.com"/><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inconsolata-v18-latin-regular.woff2" crossorigin="true"/><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/literata-v13-cyrillic_latin-italic.woff2" crossorigin="true"/><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/literata-v13-cyrillic_latin-700.woff2" crossorigin="true"/><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/literata-v13-cyrillic_latin-700italic.woff2" crossorigin="true"/><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/literata-v13-cyrillic_latin-regular.woff2" crossorigin="true"/></head><body><div class="top"><header role="banner"><a class="logo" href="/">@rapkin</a><span class="logo-details">Software developer</span><ul class="menu-wrapper"><li><a class="menu-item" href="/resume/">Resume</a></li><li><a class="menu-item" href="/about/">About</a></li></ul></header><main id="swup"><h2 id="реферат">Реферат</h2>
+<!DOCTYPE html><html lang="en"><head><title>Сегментація міст з використанням дорожньої сітки на основі відкритих супутникових даних - @rapkin</title><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="ie=edge"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="yandex-verification" content="39324391851d1a5d"/><meta name="google-site-verification" content="pnATuZP_aTcMjckmXnh2j6oO8Mk9YXUA7GfE7UO4QXk"/><link rel="stylesheet" href="/assets/css/site.css"/><meta property="og:type" content="article"/><meta property="og:site_name" content="@rapkin | Software developer"/><meta itemProp="name" content="Сегментація міст з використанням дорожньої сітки на основі відкритих супутникових даних"/><meta name="author" content="Mikola Parfenyuck"/><meta property="article:author" content="Mikola Parfenyuck"/><meta name="twitter:card" content="summary"/><meta name="twitter:site" content="@i_rapkin"/><meta name="description" content="Master paper"/><meta itemProp="description" content="Master paper"/><meta property="og:description" content="Master paper"/><meta name="twitter:description" content="Master paper"/><meta name="google" content="nositelinkssearchbox"/><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"/><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"/><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"/><link rel="manifest" href="/site.webmanifest"/><link rel="preconnect" href="https://www.google-analytics.com"/><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inconsolata-v18-latin-regular.woff2" crossorigin="true"/><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/literata-v13-cyrillic_latin-italic.woff2" crossorigin="true"/><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/literata-v13-cyrillic_latin-700.woff2" crossorigin="true"/><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/literata-v13-cyrillic_latin-700italic.woff2" crossorigin="true"/><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/literata-v13-cyrillic_latin-regular.woff2" crossorigin="true"/></head><body><div class="top"><header role="banner"><a class="logo" href="/">@rapkin</a><span class="logo-details">Software developer</span><ul class="menu-wrapper"><li><a class="menu-item" href="/resume/">Resume</a></li><li><a class="menu-item" href="/about/">About</a></li></ul></header><main id="swup"><style>
+em { color: red }
+</style>
+
+<h2 id="реферат">Реферат</h2>
 <h2 id="вступ">Вступ</h2>
 <p>Інколи розділити якусь територію на набір зон може бути корисно. Для прикладу сегментувати знімки з супутника.
 Надалі можна використати ці дані для навчання нейронних мереж, які будуть автоматично класифікувати територію на основі нових знімків, або ж знімків територій, що мають недостатнє охоплення векторними даними.</p>
@@ -12,6 +16,17 @@
 <p>Практична значущість</p>
 <h2 id="розділ-1">Розділ 1.</h2>
 <h3 id="постановка-задачі">Постановка задачі</h3>
+<p>Суть задачі полягає в побудові набору полігонів прокласифікованих за заданим набором правил на певні класи. При цьому необхідно досягнути розділення зон міста (полігонів) з використанням сітки доріг.</p>
+<p>В даній роботі було використано 6 класів: <em>(детальніше розписати по кожному класу)</em></p>
+<ul>
+<li>Забудова</li>
+<li>Агро-зона</li>
+<li>Ліси</li>
+<li>Дороги</li>
+<li>Залізничні дороги</li>
+<li>Водні території</li>
+</ul>
+<p>Потрібно реалізувати алгоритм який на вході прийматиме ідентифікатиор міста (в даному випадку id міста у відкритому джерелі OSM), завантажуватиме необхідну для розграхунків геометрію, формуватиме набір класифікованих полігонів та зберігатиме даний набір в GeoJSON файл.</p>
 <h3 id="алгоритм">Алгоритм</h3>
 <ul>
 <li><p>Завантажуємо геометрію coastline (це необхідно для правильної побудови зон міст які знаходяться біля океану).</p>
@@ -49,10 +64,11 @@
 </ul>
 <p>Варто зазначити, що в деяких місцях порядок не обов&#39;язковий і є можливість асинхронно виконувати якісь завдання (наприклад завантаження інформації, або робота з кожним класом геометрії).</p>
 <h3 id="технології">Технології</h3>
+<p>Для реалізації алгоритму було використано наступний набір технологій та ресурсів:</p>
 <ul>
-<li><p><strong>Python</strong> — насправді можна спробувати і іншою мовою зробити аналогічне (наприклад використавши JavaScript та Turf.js), та в деяких місцях на Python є можливість щось оптимізувати без особливих зусиль. Наприклад, використати Cython для компіляції коду написаного на python в нативне розширення.</p>
+<li><p><strong>Python (Cython)</strong> — насправді можна реалізувати аналогічний алгоритм і іншою мовою програмування (наприклад використавши JavaScript та Turf.js), та в деяких місцях на Python є можливість щось оптимізувати без особливих зусиль. Наприклад, використати Cython для компіляції коду написаного на Python в нативне розширення.</p>
 </li>
-<li><p><strong>Shapely</strong> — потрібен для операцій з геометрією.</p>
+<li><p><strong>Shapely</strong> — бібліотека в Python, яка надає функції для операцій з геометрією.</p>
 </li>
 <li><p><strong>Geopandas</strong> — потрібен для роботи з датасетами shape-файлів.</p>
 </li>
@@ -60,17 +76,27 @@
 </li>
 <li><p><strong>Overpass</strong> — API щоб завантажувати, фільтрувати чи трансформувати дані з OSM.</p>
 </li>
-<li><p><strong>Osm2geojson</strong> — бібліотека для конвертації даних OSM (та Overpass) в геометрію. Більше деталей в репозиторії <a href="https://github.com/aspectumapp/osm2geojson" target="_blank" rel="noopener" >aspectumapp/osm2geojson</a></p>
+<li><p><strong>Osm2geojson</strong> — бібліотека для конвертації даних OSM (та Overpass) в геометрію.</p>
 </li>
-<li><p><strong>Land polygons</strong> — датасет берегової лінії <a href="https://osmdata.openstreetmap.de/data/land-polygons.html" target="_blank" rel="noopener" >osmdata/land-polygons</a></p>
+<li><p><strong>Land polygons</strong> — датасет берегової лінії <a href="https://osmdata.openstreetmap.de/data/land-polygons.html" target="_blank" rel="noopener" >https://osmdata.openstreetmap.de/data/land-polygons.html</a></p>
 </li>
-<li><p><strong>Aspectum</strong> — сервіс для візуалізації та аналізу картографічної інформації. Можна скористатись і geojson.io, але при великій кількості геометрію можуть виникати проблеми з продуктивністю. Часто можна замінити інтерфейсом QGIS. Сторінка сервісу <a href="https://aspectum.com" target="_blank" rel="noopener" >aspectum.com</a></p>
+<li><p><strong>QGIS</strong> — графічний інтерфейс для візуалізації та роботи з просторовими даними.</p>
 </li>
 </ul>
-<h2 id="реалізація">Реалізація</h2>
+<h2 id="розділ-2-реалізація">Розділ 2. Реалізація</h2>
+<p>Етапи реалізації алгоритму можна умовно розділити на:</p>
+<ul>
+<li>Завантаження необхідної інформації</li>
+<li>Формування шаршів геометрії</li>
+<li>Реалізація &quot;простого&quot; алгоритму</li>
+<li>Реалізація алгоритму з об&#39;єднанням доріг</li>
+<li>Реалізація алгоритму зі згладжуванням некласифікованих зон</li>
+<li>Оптимізація виконання алгоритму</li>
+</ul>
+<p>Налагодження та виправлення помилок не можна виділити як окремий етап, так як цей процес необхідно виконувати на кожному етапі.</p>
 <h3 id="завантаження-даних-з-osm">Завантаження даних з OSM</h3>
-<p>Не зміг знайти хорошої бібліотеки аби відпарсити дані OSM (якщо я погано шукав, то поділіться такою бібліотекою в коментарях), тому щоб сформувати необхідну геометрію я написав бібліотеку <a href="https://github.com/aspectumapp/osm2geojson" target="_blank" rel="noopener" >osm2geojson</a>, яка перетворює OSM/Overpass XML в геометрію Shapely або GeoJSON.
-Звичайно, можна скористатись бібліотекою GDAL, але процес встановлення занадто складний.</p>
+<p>Щоб сформувати необхідну геометрію з відкритих даних OSM було реалізовано (та опубліковано в відкритий доступ) бібліотеку <a href="https://github.com/aspectumapp/osm2geojson" target="_blank" rel="noopener" >osm2geojson</a>, яка перетворює OSM/Overpass XML в геометрію Shapely або GeoJSON.
+Звичайно, можна скористатись бібліотекою GDAL, але процес встановлення занадто складний і через особливості роботи бібліотеки GDAL з файловою системою її використання значно знижує швидкість роботи алгоритму.</p>
 <p>Отож отримати межу міста можна простим запитом до API Overpass:</p>
 <pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_city_border</span><span class="hljs-params">(city_id)</span>:</span>
   data = overpass_call(<span class="hljs-string">f"""
@@ -86,7 +112,7 @@
 <p>Для отримання набору доріг запит уже складніший:</p>
 <pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_roads</span><span class="hljs-params">(minlat, minlon, maxlat, maxlon)</span>:</span>
   bb = <span class="hljs-string">f"(<span class="hljs-subst">{minlat}</span>, <span class="hljs-subst">{minlon}</span>, <span class="hljs-subst">{maxlat}</span>, <span class="hljs-subst">{maxlon}</span>)"</span>
-  data = cached_overpass_call(<span class="hljs-string">f"""
+  data = overpass_call(<span class="hljs-string">f"""
     way[highway~"^motorway$|^trunk$|^primary$|^secondary$|^tertiary$|^residential$"]<span class="hljs-subst">{bb}</span>;
     out geom;
   """</span>)
@@ -94,7 +120,7 @@
 <p>Водні об’єкти я завантажую досить великим запитом, адже там зустрічається як лінійна геометрія так і полігональна.</p>
 <pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_water_zones</span><span class="hljs-params">(minlat, minlon, maxlat, maxlon)</span>:</span>
   bb = <span class="hljs-string">f"(<span class="hljs-subst">{minlat}</span>, <span class="hljs-subst">{minlon}</span>, <span class="hljs-subst">{maxlat}</span>, <span class="hljs-subst">{maxlon}</span>)"</span>
-  data = cached_overpass_call(<span class="hljs-string">f"""
+  data = overpass_call(<span class="hljs-string">f"""
     (
       way[waterway~"^river$|^stream$|^riverbank$"]<span class="hljs-subst">{bb}</span>;
       way[landuse=basin]<span class="hljs-subst">{bb}</span>;
@@ -153,11 +179,10 @@
   rivers = build_buffer_on_lines(lines, buffer_sizes[<span class="hljs-string">'river'</span>])
   water_zones.append(rivers)
   <span class="hljs-keyword">return</span> ops.cascaded_union(water_zones)</code></pre>
-<p><strong>(Тут вже можна розписати)</strong>
-На жаль, процес класифікації геометрії OSM не вдасться повністю помістити в цю статтю (насправді це можна виділити в окрему величезну статтю), але в кількох словах завантаження всієї геометрії з OSM та розбиття за певними правилами на цільовий набір класів.</p>
+<p>Геометрію по якій буде проводитись класифікації зон міста можна завантажити зробивши схожий запит, але уже без фільтрації за властивостями об&#39;єктів.</p>
 <pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_all_geometry</span><span class="hljs-params">(minlat, minlon, maxlat, maxlon)</span>:</span>
   query = <span class="hljs-string">f"(node(<span class="hljs-subst">{minlat}</span>, <span class="hljs-subst">{minlon}</span>, <span class="hljs-subst">{maxlat}</span>, <span class="hljs-subst">{maxlon}</span>);&lt;;); out geom;"</span><span class="hljs-string">""</span>
-  data = cached_overpass_call(query)
+  data = overpass_call(query)
 
   features = []
   <span class="hljs-keyword">for</span> item <span class="hljs-keyword">in</span> xml2geojson(data)[<span class="hljs-string">'features'</span>]:
@@ -168,6 +193,7 @@
     item[<span class="hljs-string">'properties'</span>][<span class="hljs-string">'class'</span>] = cls
     features.append(item)
   <span class="hljs-keyword">return</span> features</code></pre>
+<p>В цьому коді було використано метод <code>detect_class</code>, деталі реалізації якого буде описано в наступному пункті.</p>
 <p>В результаті цих операцій ми отримуємо початкові набори геометрії (на прикладі міста Київ):</p>
 <ul>
 <li>межа міста (border)</li>
@@ -189,7 +215,7 @@
 <li>вся інша геометрія, по якій буде проводитись класифікація, згрупована за цільовим набором класів (all_geometry_by_class)</li>
 </ul>
 <p><div class="lazyload" style="padding-bottom: 94.90695396669932%" data-bg="url(/assets/optimized-img/classified-geom.png)" title="Класифікована геометрія міста Київ"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/classified-geom.png"></a></div></p>
-<h2 id="простий-алгоритм">“Простий” алгоритм</h2>
+<h3 id="простий-алгоритм">“Простий” алгоритм</h3>
 <p>Для того щоб побудувати звичайну карту потрібно на межу міста накласти всю іншу геометрію з урахуванням пріоритетів.
 Визначення пріоритетності кожного класу не зовсім очевидне завдання, наприклад водні об’єкти мають найнижчий пріоритет, бо зазвичай дорожні та залізничні шляхи проходять над річками і т.д..</p>
 <p>А от з дорогами та залізницею все трохи складніше, бо дорожні мости можуть проходити над залізничними шляхами, так і навпаки — залізничні мости над дорожніми шляхами.
@@ -254,7 +280,7 @@
   <span class="hljs-keyword">return</span> features</code></pre>
 <p>В результаті ми отримали набір полігонів (в GeoJSON).
 Але кінцева ціль — отримати класифіковані зони міста, тому полігони які ще не мають класу потрібно якось класифікувати (зони доріг, залізниці та водних об’єктів ми вже отримали на попередніх етапах).</p>
-<p>Для прикладу можна прокласифікувати ці зони порахувавши площу пересічення з іншими полігонами OSM (які до цього були автоматично розмічені за цільовим набором класів).</p>
+<p>Маючи набір некласифікованих зон можна провести їхню класифікацію вирахувавши площу пересічення з іншими полігонами OSM (які до цього було завантажено та прокласифіковано).</p>
 <pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">classify_features</span><span class="hljs-params">(features, all_geometry_by_class)</span>:</span>
   geometry_index = {}
   <span class="hljs-keyword">for</span> cls <span class="hljs-keyword">in</span> all_geometry_by_class:
@@ -302,9 +328,7 @@
 <p><div class="lazyload" style="padding-bottom: 94.90695396669932%" data-bg="url(/assets/optimized-img/kiev-simple.png)" title="Класифіковані зони міста Київ"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/kiev-simple.png"></a></div></p>
 <h3 id="алгоритм-з-обєднанням-доріг">Алгоритм з об’єднанням доріг</h3>
 <p>Цей алгоритм майже не відрізняється від попереднього, відмінний лише етап утворення мультиполігонів доріг (звичайних та залізничних).
-Аби цього досягнути потрібно замість звичайної побудови буферів робити буфер більшого розміру, а потім операцією віднімання буферу отримувати полігони потрібного розміру, при цьому дороги які були поряд стануть об’єднаними.</p>
-<p><div class="lazyload" style="padding-bottom: 63.36559940431869%" data-bg="url(/assets/img/merge-vis.gif)" title="Візуалізація алгоритму об&#39;єднання доріг"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/merge-vis.gif"></a></div></p>
-<p>Код який це робить</p>
+Аби цього досягнути потрібно замість звичайної побудови буферів робити буфер більшого розміру, а потім операцією віднімання буферу отримувати полігони потрібного розміру, при цьому дороги які були поряд стануть об’єднаними. Код який це робить:</p>
 <pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">merge_roads</span><span class="hljs-params">(polygon)</span>:</span>
   area = polygon.buffer(merge_buffer_size, cap_style=<span class="hljs-number">2</span>, join_style=<span class="hljs-number">2</span>, mitre_limit=<span class="hljs-number">1</span>)
   <span class="hljs-keyword">return</span> area.buffer(-merge_buffer_size, cap_style=<span class="hljs-number">2</span>, join_style=<span class="hljs-number">2</span>, mitre_limit=<span class="hljs-number">1</span>)</code></pre>
@@ -366,10 +390,135 @@
   <span class="hljs-keyword">return</span> geometry.MultiPolygon(zones_polygons)</code></pre>
 <p>Результат згладжування</p>
 <p><div class="lazyload" style="padding-bottom: 94.90695396669932%" data-bg="url(/assets/optimized-img/kiev.png)" title="Згладжені зони міста Київ"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/kiev.png"></a></div></p>
-<h3 id="оптимізація-виконання-алгоритму">Оптимізація виконання алгоритму</h3>
-<p>Оскільки цей алгоритм виконує розмітку для міста, то логічно буде спробувати запустити його на декількох містах.
+<h3 id="класифікація-завантаженої-геометрії-з-osm">Класифікація завантаженої геометрії з OSM</h3>
+<p>Вище було вже згадано, що завантажену геометрію з OSM потрібно класифікувати, аби потім була можливість вираховувати площі пересічень з утвореними некласифікованими зонами міст.</p>
+<p>Для розуміння повної структури стандарту OSM краще скористатись документацією стандарту (в нашому випадку потрібно також ознайомитись і з особливостями формату даних Overpass), але основні пункти буде описано тут.</p>
+<p>Кожен геометричний об&#39;єкт OSM поряд з просторовою інформацією несе також мета-дані, а саме набір властивостей ключ:значення, які покликані відобразити господарське призначення тих чи інших об&#39;єктів, їхні властивості та інше. Перерахувати всі ці властивості буде складно, але для прикладу вище в коді запиту на завантаження геометрії яка описує водні об&#39;єкти можна було помітити набір фільтрів, де і були записані такі пари ключ:значення які присвоюють саме для водних об&#39;єктів: landuse=basin, landuse=water і тд.</p>
+<p>Основні види геометрії формату OSM це: точки, лінії та полігони. Але у випадку задачі класифікації зон доцільно використовувати саме полігональну геометрію. Для ліній та точок теж можна надати розмір (утворивши буфер), але для кожного виду таких об&#39;єктів потрібно було б визначати цей розмір, що зайняло б дуже багато часу та зусиль, а вплив на якість результату був би мінімальним.</p>
+<p>Аби провести класифікацію всього різноманіття завантаженої геометрії було сформовано файл конфігурації, який зберігає значення пар ключ:значення, які відповідають вже цільвому набору класів. Приклад частини цього файлу:</p>
+<pre><code data-lang="json" class="hljs">{
+  "Artificial Surfaces": [
+    {
+      "key": "amenity",
+      "values": [
+        "animal_shelter",
+        "arts_centre",
+        "bank",
+        "bar",
+        "cafe",
+        ...
+      ]
+    },
+    {
+      "key": "building",
+      "values": [...]
+    },
+    ...
+  ],
+  "Forests": [...],
+  ...
+}</code></pre>
+<p>Маючи цю конфігурацію, доволі просто знайти до якого класу відноситься об&#39;єкт зіставивши значення властивостей об&#39;єкту зі значеннями описаними в конфігурації.</p>
+<p>Використання такої конфігурації дозволяє гнучко змінувати цільовий набір класів та властивості які характеризують кожен клас.</p>
+<p>Далі приведено код для завантаження конфігурації в пам&#39;ять та класифікації об&#39;єкту OSM відповідно.</p>
+<pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">load_osm_classes</span><span class="hljs-params">()</span>:</span>
+    osm_classes = {}
+    <span class="hljs-keyword">with</span> open(os.path.join(config.DIR, <span class="hljs-string">'osm-classes.json'</span>), encoding=<span class="hljs-string">'utf-8'</span>) <span class="hljs-keyword">as</span> data:
+        data = json.load(data)
+        <span class="hljs-keyword">for</span> label, items <span class="hljs-keyword">in</span> data.items():
+            <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> label <span class="hljs-keyword">in</span> osm_classes:
+                osm_classes[label] = {}
+
+            <span class="hljs-keyword">for</span> item <span class="hljs-keyword">in</span> items:
+                <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> item[<span class="hljs-string">'key'</span>] <span class="hljs-keyword">in</span> osm_classes[label]:
+                    osm_classes[label][item[<span class="hljs-string">'key'</span>]] = item[<span class="hljs-string">'values'</span>]
+                <span class="hljs-keyword">else</span>:
+                    <span class="hljs-keyword">for</span> v <span class="hljs-keyword">in</span> item[<span class="hljs-string">'values'</span>]:
+                        osm_classes[label][item[<span class="hljs-string">'key'</span>]].append(v)
+    <span class="hljs-keyword">return</span> osm_classes
+
+osm_classes = load_osm_classes()
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">detect_class</span><span class="hljs-params">(f)</span>:</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-string">'tags'</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> f[<span class="hljs-string">'properties'</span>]:
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+
+    <span class="hljs-keyword">for</span> key, value <span class="hljs-keyword">in</span> f[<span class="hljs-string">'properties'</span>][<span class="hljs-string">'tags'</span>].items():
+        <span class="hljs-keyword">for</span> label, by_key <span class="hljs-keyword">in</span> osm_classes.items():
+            <span class="hljs-keyword">if</span> key <span class="hljs-keyword">in</span> by_key <span class="hljs-keyword">and</span> value <span class="hljs-keyword">in</span> by_key[key]:
+                <span class="hljs-keyword">return</span> label
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span></code></pre>
+<h3 id="оптимізація-та-виконання-алгоритму">Оптимізація та виконання алгоритму</h3>
+<p>Оскільки цей алгоритм виконує розмітку для міста, то логічно буде спробувати запустити його для декількох міст.
 А в тому щоб робити це синхронно нема ніякої необхідності — найпростіше буде просто запустити виконання для кожного міста в окремому потоці.</p>
+<p>Приклад коду який запускає обрахунки для кількох міст паралельно:</p>
+<pre><code data-lang="python" class="hljs">city_ids = [
+    <span class="hljs-number">395856</span>,
+    <span class="hljs-number">421866</span>,
+    <span class="hljs-number">439840</span>,
+    ...
+]
+t_limit = Semaphore(multiprocessing.cpu_count())
+pool = []
+lock = Lock()
+
+<span class="hljs-keyword">for</span> id <span class="hljs-keyword">in</span> city_ids:
+    t = Thread(target=split_city, args=(id, lock, t_limit), name=<span class="hljs-string">f"city-<span class="hljs-subst">{id}</span>"</span>)
+    pool.append(t)
+    t.start()
+
+<span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> pool:
+    t.join()</code></pre>
+<p>Тіло методу <code>split_city</code>, який і виконує всі три модифікацї алгоритму:</p>
+<pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">split_city</span><span class="hljs-params">(id, lock, t_limit)</span>:</span>
+    lock.acquire()
+    <span class="hljs-keyword">try</span>:
+        border, roads, railways, water_zones = load_projected_data(id)
+    <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+        print(<span class="hljs-string">'Data for city not loaded'</span>, id, e)
+        traceback.print_exc()
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+    <span class="hljs-keyword">finally</span>:
+        lock.release()
+    t_limit.acquire()
+
+    zones_simple = compute_simple_zones(border, roads, railways, water_zones)
+    zones_simple = project_features_to_polar(zones_simple)
+    classify_and_save_items(zones_simple, id, <span class="hljs-string">f"data/city-<span class="hljs-subst">{id}</span>-simple.geojson"</span>)
+
+    merged_roads_multipolygon = merge_roads(roads)
+    merged_railways_multipolygon = merge_roads(railways)
+
+    zones_merged = compute_merged_zones(border, merged_roads_multipolygon, merged_railways_multipolygon, water_zones)
+    zones_merged = project_features_to_polar(zones_merged)
+    classify_and_save_items(zones_merged, id, <span class="hljs-string">f"data/city-<span class="hljs-subst">{id}</span>-merged.geojson"</span>)
+
+    zones_smoothed = compute_smoothed_zones(border, merged_roads_multipolygon, merged_railways_multipolygon, water_zones)
+    zones_smoothed = project_features_to_polar(zones_smoothed)
+    classify_and_save_items(zones_smoothed, id, <span class="hljs-string">f"data/city-<span class="hljs-subst">{id}</span>-smoothed.geojson"</span>)
+
+    t_limit.release()
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span></code></pre>
+<p>В результаті виконання цього коду буде утворено GeoJSON файли з класифікованими зонами для вказаних міст. Ці файли можна використовувати як датасет або візуалізувати (наприклад програмою QGIS).</p>
 <p>Також велику частину обрахованої геометрії можна кешувати та зберігати на жорсткий диск, але потрібно враховувати те, що OSM постійно змінюється і про інвалідацію цього кешу забувати не треба.</p>
+<p>Добре ілюструє підхід до кешування етап завантаження даних з OSM/Overpass. Вище в коді часто зустрічався метод <code>overpass_call</code>, який завантажує необхідну інформацію (згідно запиту) з Overpass:</p>
+<pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">overpass_call</span><span class="hljs-params">(query)</span>:</span>
+    encoded = urllib.parse.quote(query.encode(<span class="hljs-string">"utf-8"</span>), safe=<span class="hljs-string">'~()*!.\''</span>)
+    r = requests.post(config.OVERPASS,
+                      data=<span class="hljs-string">f"data=<span class="hljs-subst">{encoded}</span>"</span>,
+                      headers={<span class="hljs-string">"Content-Type"</span>: <span class="hljs-string">"application/x-www-form-urlencoded;charset=UTF-8"</span>})
+    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> r.status_code <span class="hljs-keyword">is</span> <span class="hljs-number">200</span>:
+        <span class="hljs-keyword">raise</span> requests.exceptions.HTTPError(<span class="hljs-string">'Overpass server respond with status '</span>+str(r.status_code))
+    <span class="hljs-keyword">return</span> r.text</code></pre>
+<p>В коді доволі просто замінити виклик цього методу на версію з вбудованим механізмом кешування:</p>
+<pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">cached_overpass_call</span><span class="hljs-params">(query)</span>:</span>
+    name = os.path.join(config.CACHE_DIR, str(zlib.adler32(query.encode())) + <span class="hljs-string">'.osm'</span>)
+    <span class="hljs-keyword">if</span> os.path.exists(name):
+        <span class="hljs-keyword">with</span> codecs.open(name, <span class="hljs-string">'r'</span>, encoding=<span class="hljs-string">'utf8'</span>) <span class="hljs-keyword">as</span> data:
+            <span class="hljs-keyword">return</span> data.read()
+    data = overpass_call(query)
+    save_file(data, name)
+    <span class="hljs-keyword">return</span> data</code></pre>
 <p>Ще одним місцем для оптимізації є інтерпретатор Python.
 Значна кількість обчислень в бібліотеці Shapely і так винесена в нативне розширення (основними операціями з геометрією займається бібліотека GEOS, яка написана на C++).
 Але в нашому коді також є велика кількість обрахунків на стороні python.
