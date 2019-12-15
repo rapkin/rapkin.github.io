@@ -7,7 +7,7 @@ em { color: red }
 <p>Інколи розділити якусь територію на набір зон може бути корисно. Для прикладу сегментувати знімки з супутника.
 Надалі можна використати ці дані для навчання нейронних мереж, які будуть автоматично класифікувати територію на основі нових знімків, або ж знімків територій, що мають недостатнє охоплення векторними даними.</p>
 <p>Актуальність теми зумовлена стрімким розвитком сфери нейронних мереж та машинного навчання. І одним з розділів цієї сфери є саме генерація та підбір інформації на якій проводитиметься навчання штучних нейронних мереж. В даному випадку утворений набір даних можна використати при розв&#39;язанні задачі автоматичної сегментації та класифікації урбанізованих територій. Також карта сегментованих територій надає візуальне представлення функціональних зон міста і може виявитись корисною для органів самоврядування при плануванні міської забудови.</p>
-<p>Метою роботи є аналіз та створення алгоритму для ефективного сегментування урбанізованих територій використовуючи відкриті джерела інформації. Потрібно отримати векторну розмітку зон міста класифікованих за набором правил.
+<p>Метою роботи є аналіз та створення алгоритму для ефективного сегментування урбанізованих територій використовуючи відкриті джерела інформації. Потрібно отримати векторну розмітку зон міста (класифікованих за набором правил).
 Зони мають бути виділені на основі сітки доріг, залізничних шляхів, водних об&#39;єктів.</p>
 <p>Об&#39;єктом дослідження є набір відкритої векторної інформації ресурсу OSM.
 Предметом дослідження - сукупність інструментів та методів аналізу геопросторової інформації, алгоритми для проведення геометричних операцій та оптимізації виконання цих операцій.</p>
@@ -84,14 +84,104 @@ em { color: red }
 <li><p><strong>QGIS</strong> — графічний інтерфейс для візуалізації та роботи з просторовими даними.</p>
 </li>
 </ul>
-<h2 id="розділ-2-теоретичні-відомості">Розділ 2. Теоретичні відомості</h2>
-<p><em>Невже тут писати, що таке пітон і тд? Можливо, краще вставити більше інформації про проблеми обрахунків великих об&#39;ємів геопросторових даних (неправильна геометрія, індексація, проекція)?</em></p>
-<p><strong>Стандарт OSM</strong></p>
-<p><strong>Геопросторова інформація, види геометрії</strong></p>
-<p><strong>Опис проблеми неправильної геометрії</strong></p>
-<p><strong>Оптимізація швидкості обрахунків геопросторових даних, індексація</strong></p>
-<p><strong>Проекція геометрії в різні системи координат</strong></p>
-<p><strong>Проблема точності обрахунків</strong></p>
+<h2 id="розділ-2-методи-збереження-та-обробки-геопросторових-даних">Розділ 2. Методи збереження та обробки геопросторових даних</h2>
+<h3 id="геопросторові-дані-види-геометрії">Геопросторові дані, види геометрії</h3>
+<p>Геопросторові дані - дані про просторові об&#39;єкти та їх набори, вони складають основу інформаційного забезпечення геоінформаційних систем. Більшість геоінформаційних систем працюють з наступним набором примітивів:</p>
+<ul>
+<li>Точка (Point)</li>
+<li>Відрізок (Linestring)</li>
+<li>Багатокутник (Polygon)</li>
+<li>Набір точок (MultiPoint)</li>
+<li>Набір відрізків (MultiLinestring)</li>
+<li>Набір багатокутників (MultiPolygon)</li>
+<li>Колекція типів (GeometryCollection)</li>
+</ul>
+<p>Просторові дані зазвичай складаються з двох взаємопов&#39;язаних частин: координатних і атрибутивних даних. Встановлення зв&#39;язку між цими частинами називається геокодування.</p>
+<p>Координатні дані визначають позиційні характеристики просторового об&#39;єкта. Вони описують його місце розташування у встановленій системі координат.</p>
+<p>Атрибутивні дані представляють собою сукупність непозиційних характеристик (атрибутів) просторового об&#39;єкта. Атрибутивні дані визначають смисловий зміст (семантику) об&#39;єкта і можуть містити якісні або кількісні значення.</p>
+<h3 id="стандарт-osm">Стандарт OSM</h3>
+<p>OpenStreetMap (далі OSM) - це відкритий проект спрямований на збір, збереження та розповсюдження загальнодоступних геопросторових даних. В рамках цього проекту існує стандарт збреження цієї геопросторової інформації. Для зручного збереження такої частозмінюваної інформації використовується XML-файл в якому міститься розмітка об&#39;єктів для всієї Землі. OSM використовує рівнокутну проекцію Меркатора.</p>
+<p>Геопросторові дані проекту OpenStreetMap ліцензуються на умовах Open Database License, яка дозволяє їх використання з будь-якою, у т.ч. комерційною метою, за умови зазначення походження даних.</p>
+<p>Базові інструменти OSM оперують даними у форматі XML, який описує набір елементів (вузли, відрізки та зв&#39;язки).
+Елементи, або базові примітиви включають:</p>
+<ul>
+<li>Точка (вузол) - позначає окрему геопросторову точку, характеризується щонайменше широтою та довготою.</li>
+<li>Лінія - впорядкований за напрямком список від 2 до 2000 точок. Використовується для позначення лінійних структур або площин (якщо лінія замкнута).</li>
+<li>Зв&#39;язок - впорядкований список з елементів, тобто точок, ліній, та інших зв&#39;язків. Окремі елементи зв&#39;язків характеризуються первними ролями. Типовим прикладом зв&#39;язку може бути маршрут громадського транспорту, який включає лінії автошляхів та точки зупинок.</li>
+<li>Тег - певна інформація, пов&#39;язана з одним із зазначених вище елементів. Складається з двох текстових полів довільного формату, &#39;ключ&#39; та &#39;значення&#39;.</li>
+</ul>
+<p>Приклад такого XML-файлу:</p>
+<pre><code data-lang="xml" class="hljs"><span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">osm</span> <span class="hljs-attr">version</span>=<span class="hljs-string">"0.6"</span> <span class="hljs-attr">generator</span>=<span class="hljs-string">"CGImap 0.0.2"</span>&gt;</span>
+ <span class="hljs-tag">&lt;<span class="hljs-name">bounds</span> <span class="hljs-attr">minlat</span>=<span class="hljs-string">"54.0889580"</span> <span class="hljs-attr">minlon</span>=<span class="hljs-string">"12.2487570"</span> <span class="hljs-attr">maxlat</span>=<span class="hljs-string">"54.0913900"</span> <span class="hljs-attr">maxlon</span>=<span class="hljs-string">"12.2524800"</span>/&gt;</span>
+ <span class="hljs-tag">&lt;<span class="hljs-name">node</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"298884269"</span> <span class="hljs-attr">lat</span>=<span class="hljs-string">"54.0901746"</span> <span class="hljs-attr">lon</span>=<span class="hljs-string">"12.2482632"</span> <span class="hljs-attr">user</span>=<span class="hljs-string">"SvenHRO"</span> <span class="hljs-attr">uid</span>=<span class="hljs-string">"46882"</span> <span class="hljs-attr">visible</span>=<span class="hljs-string">"true"</span> <span class="hljs-attr">version</span>=<span class="hljs-string">"1"</span> <span class="hljs-attr">changeset</span>=<span class="hljs-string">"676636"</span> <span class="hljs-attr">timestamp</span>=<span class="hljs-string">"2008-09-21T21:37:45Z"</span>/&gt;</span>
+ <span class="hljs-tag">&lt;<span class="hljs-name">node</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"261728686"</span> <span class="hljs-attr">lat</span>=<span class="hljs-string">"54.0906309"</span> <span class="hljs-attr">lon</span>=<span class="hljs-string">"12.2441924"</span> <span class="hljs-attr">user</span>=<span class="hljs-string">"PikoWinter"</span> <span class="hljs-attr">uid</span>=<span class="hljs-string">"36744"</span> <span class="hljs-attr">visible</span>=<span class="hljs-string">"true"</span> <span class="hljs-attr">version</span>=<span class="hljs-string">"1"</span> <span class="hljs-attr">changeset</span>=<span class="hljs-string">"323878"</span> <span class="hljs-attr">timestamp</span>=<span class="hljs-string">"2008-05-03T13:39:23Z"</span>/&gt;</span>
+ <span class="hljs-tag">&lt;<span class="hljs-name">node</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"1831881213"</span> <span class="hljs-attr">version</span>=<span class="hljs-string">"1"</span> <span class="hljs-attr">changeset</span>=<span class="hljs-string">"12370172"</span> <span class="hljs-attr">lat</span>=<span class="hljs-string">"54.0900666"</span> <span class="hljs-attr">lon</span>=<span class="hljs-string">"12.2539381"</span> <span class="hljs-attr">user</span>=<span class="hljs-string">"lafkor"</span> <span class="hljs-attr">uid</span>=<span class="hljs-string">"75625"</span> <span class="hljs-attr">visible</span>=<span class="hljs-string">"true"</span> <span class="hljs-attr">timestamp</span>=<span class="hljs-string">"2012-07-20T09:43:19Z"</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">tag</span> <span class="hljs-attr">k</span>=<span class="hljs-string">"name"</span> <span class="hljs-attr">v</span>=<span class="hljs-string">"Neu Broderstorf"</span>/&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">tag</span> <span class="hljs-attr">k</span>=<span class="hljs-string">"traffic_sign"</span> <span class="hljs-attr">v</span>=<span class="hljs-string">"city_limit"</span>/&gt;</span>
+ <span class="hljs-tag">&lt;/<span class="hljs-name">node</span>&gt;</span>
+ ...
+ <span class="hljs-tag">&lt;<span class="hljs-name">node</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"298884272"</span> <span class="hljs-attr">lat</span>=<span class="hljs-string">"54.0901447"</span> <span class="hljs-attr">lon</span>=<span class="hljs-string">"12.2516513"</span> <span class="hljs-attr">user</span>=<span class="hljs-string">"SvenHRO"</span> <span class="hljs-attr">uid</span>=<span class="hljs-string">"46882"</span> <span class="hljs-attr">visible</span>=<span class="hljs-string">"true"</span> <span class="hljs-attr">version</span>=<span class="hljs-string">"1"</span> <span class="hljs-attr">changeset</span>=<span class="hljs-string">"676636"</span> <span class="hljs-attr">timestamp</span>=<span class="hljs-string">"2008-09-21T21:37:45Z"</span>/&gt;</span>
+ <span class="hljs-tag">&lt;<span class="hljs-name">way</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"26659127"</span> <span class="hljs-attr">user</span>=<span class="hljs-string">"Masch"</span> <span class="hljs-attr">uid</span>=<span class="hljs-string">"55988"</span> <span class="hljs-attr">visible</span>=<span class="hljs-string">"true"</span> <span class="hljs-attr">version</span>=<span class="hljs-string">"5"</span> <span class="hljs-attr">changeset</span>=<span class="hljs-string">"4142606"</span> <span class="hljs-attr">timestamp</span>=<span class="hljs-string">"2010-03-16T11:47:08Z"</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">nd</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">"292403538"</span>/&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">nd</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">"298884289"</span>/&gt;</span>
+  ...
+  <span class="hljs-tag">&lt;<span class="hljs-name">nd</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">"261728686"</span>/&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">tag</span> <span class="hljs-attr">k</span>=<span class="hljs-string">"highway"</span> <span class="hljs-attr">v</span>=<span class="hljs-string">"unclassified"</span>/&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">tag</span> <span class="hljs-attr">k</span>=<span class="hljs-string">"name"</span> <span class="hljs-attr">v</span>=<span class="hljs-string">"Pastower Straße"</span>/&gt;</span>
+ <span class="hljs-tag">&lt;/<span class="hljs-name">way</span>&gt;</span>
+ <span class="hljs-tag">&lt;<span class="hljs-name">relation</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"56688"</span> <span class="hljs-attr">user</span>=<span class="hljs-string">"kmvar"</span> <span class="hljs-attr">uid</span>=<span class="hljs-string">"56190"</span> <span class="hljs-attr">visible</span>=<span class="hljs-string">"true"</span> <span class="hljs-attr">version</span>=<span class="hljs-string">"28"</span> <span class="hljs-attr">changeset</span>=<span class="hljs-string">"6947637"</span> <span class="hljs-attr">timestamp</span>=<span class="hljs-string">"2011-01-12T14:23:49Z"</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">member</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"node"</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">"294942404"</span> <span class="hljs-attr">role</span>=<span class="hljs-string">""</span>/&gt;</span>
+  ...
+  <span class="hljs-tag">&lt;<span class="hljs-name">member</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"node"</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">"364933006"</span> <span class="hljs-attr">role</span>=<span class="hljs-string">""</span>/&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">member</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"way"</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">"4579143"</span> <span class="hljs-attr">role</span>=<span class="hljs-string">""</span>/&gt;</span>
+  ...
+  <span class="hljs-tag">&lt;<span class="hljs-name">member</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"node"</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">"249673494"</span> <span class="hljs-attr">role</span>=<span class="hljs-string">""</span>/&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">tag</span> <span class="hljs-attr">k</span>=<span class="hljs-string">"name"</span> <span class="hljs-attr">v</span>=<span class="hljs-string">"Küstenbus Linie 123"</span>/&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">tag</span> <span class="hljs-attr">k</span>=<span class="hljs-string">"network"</span> <span class="hljs-attr">v</span>=<span class="hljs-string">"VVW"</span>/&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">tag</span> <span class="hljs-attr">k</span>=<span class="hljs-string">"operator"</span> <span class="hljs-attr">v</span>=<span class="hljs-string">"Regionalverkehr Küste"</span>/&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">tag</span> <span class="hljs-attr">k</span>=<span class="hljs-string">"ref"</span> <span class="hljs-attr">v</span>=<span class="hljs-string">"123"</span>/&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">tag</span> <span class="hljs-attr">k</span>=<span class="hljs-string">"route"</span> <span class="hljs-attr">v</span>=<span class="hljs-string">"bus"</span>/&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">tag</span> <span class="hljs-attr">k</span>=<span class="hljs-string">"type"</span> <span class="hljs-attr">v</span>=<span class="hljs-string">"route"</span>/&gt;</span>
+ <span class="hljs-tag">&lt;/<span class="hljs-name">relation</span>&gt;</span>
+ ...
+<span class="hljs-tag">&lt;/<span class="hljs-name">osm</span>&gt;</span></code></pre>
+<p>OSM представляє фізичні особливості на місцях (наприклад, дороги чи будівлі), використовуючи теги,
+прикріплені до основних структур даних.
+Кожен тег описує географічний атрибут функції, який відображається цим конкретним вузлом, відрізком чи зв&#39;язком.
+Дозволяється включати необмежену кількість атрибутів, що описують кожну функцію. Співтовариство погоджується на певні поєднання ключів і значень для найбіль часто використовуваних тегів, які виступають як неофіційні стандарти.
+Однак користувачі можуть створювати нові теги для вдосконалення стилю карти або для розширення описового апарату.</p>
+<h3 id="опис-проблем-неправильної-геометрії-та-точності-обрахунків">Опис проблем неправильної геометрії та точності обрахунків</h3>
+<p>Геоінформаційні системи не можуть правильно працювати у випадку коли використовується неправильна геометрія.
+Для прикладу можна привести ситуацію з багатокутникои (полігоном). Дійсний багатокутник не може мати зовнішніх або внутрішніх кілець, що пересікаються. Також мультиполігон не може містити полігони які пересікаються. Всі операції (пересічення, віднімання) на неправильній геометрії можуть закінчуватись з помилкою.</p>
+<p>Через подібні проблеми робота з геопросторовими даними дещо ускладнюється, бо доводиться постійно слідкувати аби після кожної операції утворювалась правильна геометрія. Існують методи для виправлення деяких випадків неправильної геометрії які дають очікуваний результат (інколи ці методи призводять до втрати частини геометричної інформації). Інший варіант обробки неправильної геометрії полягає у фільтрації таких об&#39;єктів, але це призводить до повної втрати інформації, тому пріоритет завжди надається виправленню неправильної геометрії.</p>
+<p>Ще однією проблемою, є неточність обрахунків. Часто в геоінформаційних системах після проведення низки геометричних операцій вирахувані координати можуть мати похибку обчислень (це загальновідома проблема похибки обчислень в операціях з плаваючою точкою). Такі похибки і можуть спричиняти накладання полігонів, або ж утворення &quot;прогалин&quot; між ними, що є небажаним результатом.</p>
+<p>Головну складність в процесі виправлення геометрії складає те, що в кожному випадку потрібно самостійно вирішувати який метод виправлення може спрацювати найкраще для вирішення поставленого завдання.</p>
+<h3 id="методи-оптимізація-швидкості-обрахунків-геопросторових-даних-індексація">Методи оптимізація швидкості обрахунків геопросторових даних, індексація</h3>
+<p>Через значні об&#39;єми геопросторової інформації та особливості роботи геометричних операцій, виникла необхідність вирішувати проблеми пов&#39;язані зі швидким ростом складності обрахунків.</p>
+<p>Для прикладу розмітка деяких полігональних об&#39;єктів налічує більше мільйона точок, це призводить до значного сповільнення роботи операцій пересічення та віднімання. Аби впоратись з цією проблемою найчастіше використовують розбиття цього полігону на меньші (триангуляція або інший спосіб розбиття). Мінусом у цьому випадку є ускладнення логіки роботи з такими об&#39;єктами та ріст кількості об&#39;єктів. Тому важливо вдало підібрати спосіб розбиття де буде збалансовано кількість утворених об&#39;єктів та їхня деталізація (кількість вершин кожного полігону).</p>
+<p>У зв&#39;язку з великою кількістю об&#39;єктів, при проведенні операцій над ними, часто використовують індекси. Це допомагає скоротити кількість обчислень, адже не доводиться проводити ці операції повним перебором. Зазвичай для цього використовують деревовидні структури (дерево квадрантів, R-дерево і тд.). Найчастіше використовують варіації R-дерева.</p>
+<p>R-дерево - деревоподібна структура даних, яка використовується для організації доступу до просторових даних, тобто для індексації багатовимірної інформації, такої, наприклад, як географічні координати, прямокутники або многокутники. R-дерево було запропоноване в 1984 році Антоніном Гуттманном і знайшло значне застосування як у теоретичному, так і у прикладному аспектах.</p>
+<p>У випадку двовимірного простору, ця структура даних розбиває простір на множину ієрархічно вкладених прямокутників, які можуть перетинатись. У разі тривимірного або багатовимірного простору це будуть прямокутні паралелепіпеди.</p>
+<p><div class="lazyload" style="padding-bottom: 100%" data-bg="url(/assets/optimized-img/rtree.png)" title="Візуалізація R*-дерева для 3D"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/rtree.png"></a></div></p>
+<p>Алгоритми вставки і видалення використовують ці обмежуючі прямокутники для забезпечення того, щоб &quot;близько розташовані&quot; об&#39;єкти були поміщені в одну листову вершину. Зокрема, новий об&#39;єкт потрапить у ту листову вершину, для якої потрібно найменше розширення її прямокутника. Кожен елемент листової вершини зберігає два поля даних: спосіб ідентифікації даних, що описують об&#39;єкт, (або самі ці дані) і прямокутник, який обмежує цей об&#39;єкт.</p>
+<p>В поєднанні ці два методи (метод розбиття та метод індексації) дозволяють значно оптимізувати швидкість виконання геометричних операцій. Недоліком зазвичай є ріст використання пам&#39;яті комп&#39;ютера для організації збереження цих структур.</p>
+<h3 id="картографічні-проекції-та-їх-недоліки">Картографічні проекції та їх недоліки</h3>
+<p>Картографічні проекції - математичні способи зображення земного сфероїда на площині, при яких кожній точці M зображуваної поверхні відповідає точка M&#39;, яка називається її зображенням на площині. У картографічній проекції меридіани і паралелі зображено системою прямих чи плоских кривих ліній. За характером спотворень картографічні проекції поділяють на рівнокутні, рівновеликі та довільні. За видом зображень нормальної картографічної сітки — на азимутальні, циліндричні, конічні, псевдоконічні, псевдоциліндричні, поліконічні та псевдоазимутальні.</p>
+<p>Будь-яка проекція має спотворення, воно буває чотирьох видів:</p>
+<ul>
+<li>спотворення довжин</li>
+<li>спотворення кутів</li>
+<li>спотворення площ</li>
+<li>спотворення форм</li>
+</ul>
+<p>На різних картах спотворення можуть бути різних розмірів: на великомасштабних вони практично непомітні, а на маломасштабних, вони бувають дуже суттєві.</p>
+<p>У цій роботі використано дві проекції:</p>
+<ul>
+<li>Світова геодезична система (WGS 84) - стандартизована координатна система на Землі, яка розроблена та підтримується Геопросторово-розвідувальною агенцією США.</li>
+<li>Рівнокутна циліндрична проекція Меркатора - одна з основних картографічних проекцій. Розроблена Герардом Меркатором для застосування в його &quot;Атласі&quot;.</li>
+</ul>
+<p>Необхідність використання цих проекцій випливає з особливостей представлення геопросторових даних ресурсу OSM.</p>
 <p><strong>Опис існуючих інструментів для роботи з геопросторовими даними</strong></p>
 <p><strong>Опис форматів збереження геопросторової інформації (GeoJSON, Shapefile)</strong></p>
 <h2 id="розділ-3-реалізація">Розділ 3. Реалізація</h2>
@@ -168,7 +258,7 @@ em { color: red }
 В документації Shapely більше деталей по роботі цього методу <a href="https://shapely.readthedocs.io/en/stable/manual.html#object.buffer" target="_blank" rel="noopener" >shapely/object.buffer</a>.</p>
 <p>З підбором розміру цього буферу теж все доволі просто — для різних видів доріг в OSM є свої теги і детальний опис як їх потрібно використовувати, наприклад, для доріг в Україні можна скористатись класифікацією з <a href="https://wiki.openstreetmap.org/wiki/Uk:%D0%92%D1%96%D0%BA%D1%96%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82_%D0%A3%D0%BA%D1%80%D0%B0%D1%97%D0%BD%D0%B0/%D0%9A%D0%BB%D0%B0%D1%81%D0%B8%D1%84%D1%96%D0%BA%D0%B0%D1%86%D1%96%D1%8F_%D0%B4%D0%BE%D1%80%D1%96%D0%B3" target="_blank" rel="noopener" >вікі OSM</a> (для інших країн теж існують подібні класифікації).
 А самі значення розміру дорожньої смуги можна знайти в державних стандартах (для більшості країн значення часто однакові).</p>
-<p>Для побудови буферів слугує функція build_buffer_on_lines, яка виконує побудову квадратного буфера. <em>буфера/буферу</em>
+<p>Для побудови буферів слугує функція build_buffer_on_lines, яка виконує побудову квадратного буферу.
 Цей вид буферу найкраще підходить для нашого випадку (по якості результату та кількості обчислень).</p>
 <pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">build_buffer_on_lines</span><span class="hljs-params">(lines, b_size)</span>:</span>
   buffers = []
