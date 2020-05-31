@@ -1,0 +1,174 @@
+<!DOCTYPE html><html lang="en"><head><title>How to extract information about fishing places from OSM with Python and osm2geojson - @rapkin</title><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="ie=edge"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="yandex-verification" content="39324391851d1a5d"/><meta name="google-site-verification" content="pnATuZP_aTcMjckmXnh2j6oO8Mk9YXUA7GfE7UO4QXk"/><link rel="stylesheet" href="/assets/css/site.css"/><meta property="og:type" content="article"/><meta property="og:site_name" content="@rapkin | Software developer"/><meta itemProp="name" content="How to extract information about fishing places from OSM with Python and osm2geojson"/><meta name="author" content="Mikola Parfenyuck"/><meta property="article:author" content="Mikola Parfenyuck"/><meta name="twitter:card" content="summary"/><meta name="twitter:site" content="@i_rapkin"/><meta name="description" content="Example how to extract information about fishing places in Ukraine from OpenStreetMap using Python and osm2geojson"/><meta itemProp="description" content="Example how to extract information about fishing places in Ukraine from OpenStreetMap using Python and osm2geojson"/><meta property="og:description" content="Example how to extract information about fishing places in Ukraine from OpenStreetMap using Python and osm2geojson"/><meta name="twitter:description" content="Example how to extract information about fishing places in Ukraine from OpenStreetMap using Python and osm2geojson"/><meta itemProp="image" content="https://rapkin.com.ua/assets/optimized-img/fishing.jpg"/><meta property="og:image" content="https://rapkin.com.ua/assets/optimized-img/fishing.jpg"/><meta name="twitter:image" content="https://rapkin.com.ua/assets/optimized-img/fishing.jpg"/><meta name="google" content="nositelinkssearchbox"/><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","author":"Mikola Parfenyuck","headline":"How to extract information about fishing places from OSM with Python and osm2geojson","datePublished":"2020-05-24T17:23:42.000Z","publisher":{"@type":"Organization","name":"rapkin","url":"https://rapkin.com.ua","logo":{"@type":"ImageObject","url":"https://rapkin.com.ua/assets/optimized-img/bunny.png"}},"name":"How to extract information about fishing places from OSM with Python and osm2geojson","image":"https://rapkin.com.ua/assets/optimized-img/fishing.jpg"}</script><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"/><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"/><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"/><link rel="manifest" href="/site.webmanifest"/><link rel="preconnect" href="https://www.google-analytics.com"/><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inconsolata-v18-latin-regular.woff2" crossorigin="true"/><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/literata-v13-cyrillic_latin-italic.woff2" crossorigin="true"/><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/literata-v13-cyrillic_latin-700.woff2" crossorigin="true"/><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/literata-v13-cyrillic_latin-700italic.woff2" crossorigin="true"/><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/literata-v13-cyrillic_latin-regular.woff2" crossorigin="true"/></head><body><div class="top"><header role="banner"><a class="logo" href="/">@rapkin</a><span class="logo-details">Software developer</span><ul class="menu-wrapper"><li><a class="menu-item" href="/resume/">Resume</a></li><li><a class="menu-item" href="/about/">About</a></li></ul></header><main id="swup"><h1 class="page-title">How to extract information about fishing places from OSM with Python and osm2geojson</h1><p>I love fishing! And the place itself is very important for fishing. You can usually use a local site or forum to find a suitable place. But I&#39;m not used to looking for shortcuts, so I&#39;ll try to use OpenStreetMap to find fishing places.</p>
+<p>In OSM Wiki I found two useful tags <a href="https://wiki.openstreetmap.org/wiki/Tag:leisure%3Dfishing" target="_blank" rel="noopener" >leisure=fishing</a> and <a href="https://wiki.openstreetmap.org/wiki/Key:fishing" target="_blank" rel="noopener" >fishing=*</a>. To find all geometry by this tag you can run this query with <a href="https://overpass-turbo.eu/" target="_blank" rel="noopener" >Overpass Turbo</a>:</p>
+<pre><code data-lang="R" class="hljs">[out:json];
+(
+    node[leisure=fishing]({{bbox}});
+    node[fishing=yes]({{bbox}});
+    node[fishing=private]({{bbox}});
+    node[fishing=permissive]({{bbox}});
+    way[leisure=fishing]({{bbox}});
+    way[fishing=yes]({{bbox}});
+    way[fishing=private]({{bbox}});
+    way[fishing=permissive]({{bbox}});
+    relation[leisure=fishing]({{bbox}});
+    relation[fishing=yes]({{bbox}});
+    relation[fishing=private]({{bbox}});
+    relation[fishing=permissive]({{bbox}});
+    &lt;;
+);
+out geom;</code></pre>
+<p>Ok, what we can do with this data? First idea is to filter geometry by country (in my case Ukraine).
+To do this we should download boundary of country and find intersections with this boundary for all fishing places.</p>
+<p>The easiest way is to run Overpass-query with name of a country:</p>
+<pre><code data-lang="R" class="hljs">[out:json];
+rel[admin_level=<span class="hljs-number">2</span>][<span class="hljs-string">"name:en"</span>=<span class="hljs-string">"Ukraine"</span>];
+out geom;</code></pre>
+<p><div class="lazyload" style="padding-bottom: 72.08524864187213%" data-bg="url(/assets/optimized-img/ukraine-border-overpass.png)" title="Ukrainian border in overpass"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/ukraine-border-overpass.png"></a></div></p>
+<p>When we have border of country we can find all geometries that have intersection with country polygon (or multipolygon). To convert OSM data (loaded with overpass) I use <a href="https://github.com/aspectumapp/osm2geojson" target="_blank" rel="noopener" >osm2geojson</a>.
+Here full example on python how to download data from Overpass and convert it to GeoJSON:</p>
+<pre><code data-lang="python" class="hljs"><span class="hljs-keyword">import</span> requests
+<span class="hljs-keyword">import</span> urllib
+<span class="hljs-keyword">import</span> codecs
+<span class="hljs-keyword">import</span> json
+<span class="hljs-keyword">import</span> os
+<span class="hljs-keyword">from</span> shapely <span class="hljs-keyword">import</span> geometry
+<span class="hljs-keyword">from</span> shapely.strtree <span class="hljs-keyword">import</span> STRtree
+<span class="hljs-keyword">from</span> osm2geojson <span class="hljs-keyword">import</span> json2geojson
+
+OVERPASS = <span class="hljs-string">"https://overpass-api.de/api/interpreter/"</span>
+SPLIT_SIZE = <span class="hljs-number">1.5</span> <span class="hljs-comment"># optimal value for countries</span>
+
+
+<span class="hljs-comment"># source from https://snorfalorpagus.net/blog/2016/03/13/splitting-large-polygons-for-faster-intersections/</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">katana</span><span class="hljs-params">(shape, threshold, count=<span class="hljs-number">0</span>)</span>:</span>
+    <span class="hljs-string">"""Split a Polygon into two parts across it's shortest dimension"""</span>
+    bounds = shape.bounds
+    <span class="hljs-keyword">if</span> len(bounds) == <span class="hljs-number">0</span>:
+        <span class="hljs-comment"># emptry geometry, usual situation</span>
+        width = <span class="hljs-number">0</span>
+        height = <span class="hljs-number">0</span>
+    <span class="hljs-keyword">else</span>:
+        width = bounds[<span class="hljs-number">2</span>] - bounds[<span class="hljs-number">0</span>]
+        height = bounds[<span class="hljs-number">3</span>] - bounds[<span class="hljs-number">1</span>]
+
+    <span class="hljs-keyword">if</span> max(width, height) &lt;= threshold <span class="hljs-keyword">or</span> count == <span class="hljs-number">250</span>:
+        <span class="hljs-comment"># either the polygon is smaller than the threshold, or the maximum</span>
+        <span class="hljs-comment"># number of recursions has been reached</span>
+        <span class="hljs-keyword">return</span> [shape]
+    <span class="hljs-keyword">if</span> height &gt;= width:
+        <span class="hljs-comment"># split left to right</span>
+        a = geometry.box(bounds[<span class="hljs-number">0</span>], bounds[<span class="hljs-number">1</span>], bounds[<span class="hljs-number">2</span>], bounds[<span class="hljs-number">1</span>]+height/<span class="hljs-number">2</span>)
+        b = geometry.box(bounds[<span class="hljs-number">0</span>], bounds[<span class="hljs-number">1</span>]+height/<span class="hljs-number">2</span>, bounds[<span class="hljs-number">2</span>], bounds[<span class="hljs-number">3</span>])
+    <span class="hljs-keyword">else</span>:
+        <span class="hljs-comment"># split top to bottom</span>
+        a = geometry.box(bounds[<span class="hljs-number">0</span>], bounds[<span class="hljs-number">1</span>], bounds[<span class="hljs-number">0</span>]+width/<span class="hljs-number">2</span>, bounds[<span class="hljs-number">3</span>])
+        b = geometry.box(bounds[<span class="hljs-number">0</span>]+width/<span class="hljs-number">2</span>, bounds[<span class="hljs-number">1</span>], bounds[<span class="hljs-number">2</span>], bounds[<span class="hljs-number">3</span>])
+    result = []
+    <span class="hljs-keyword">for</span> d <span class="hljs-keyword">in</span> (a, b,):
+        c = shape.intersection(d)
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> isinstance(c, geometry.GeometryCollection):
+            c = [c]
+        <span class="hljs-keyword">for</span> e <span class="hljs-keyword">in</span> c:
+            <span class="hljs-keyword">if</span> isinstance(e, (geometry.Polygon, geometry.MultiPolygon)):
+                result.extend(katana(e, threshold, count+<span class="hljs-number">1</span>))
+    <span class="hljs-keyword">if</span> count &gt; <span class="hljs-number">0</span>:
+        <span class="hljs-keyword">return</span> result
+    <span class="hljs-comment"># convert multipart into singlepart</span>
+    final_result = []
+    <span class="hljs-keyword">for</span> g <span class="hljs-keyword">in</span> result:
+        <span class="hljs-keyword">if</span> isinstance(g, geometry.MultiPolygon):
+            final_result.extend(g)
+        <span class="hljs-keyword">else</span>:
+            final_result.append(g)
+    <span class="hljs-keyword">return</span> final_result
+
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">overpass_call</span><span class="hljs-params">(query)</span>:</span>
+    encoded = urllib.parse.quote(query.encode(<span class="hljs-string">'utf-8'</span>), safe=<span class="hljs-string">'~()*!.\''</span>)
+    r = requests.post(OVERPASS,
+                      data=<span class="hljs-string">f"data=<span class="hljs-subst">{encoded}</span>"</span>,
+                      headers={<span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/x-www-form-urlencoded; charset=UTF-8'</span>})
+    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> r.status_code <span class="hljs-keyword">is</span> <span class="hljs-number">200</span>:
+        <span class="hljs-keyword">raise</span> requests.exceptions.HTTPError(<span class="hljs-string">'Overpass server respond with status '</span>+str(r.status_code))
+    <span class="hljs-keyword">return</span> r.text
+
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_country_border</span><span class="hljs-params">(name)</span>:</span>
+    print(<span class="hljs-string">f"Loading border of <span class="hljs-subst">{name}</span>..."</span>)
+    data = overpass_call(<span class="hljs-string">f"""
+        [out:json];
+        rel[admin_level=2]["name:en"="<span class="hljs-subst">{name}</span>"];
+        out geom;
+    """</span>)
+    geojson_data = json2geojson(data)
+
+    print(<span class="hljs-string">f"Country border loaded!"</span>)
+    <span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> geojson_data[<span class="hljs-string">'features'</span>]:
+        <span class="hljs-keyword">if</span> f[<span class="hljs-string">'properties'</span>][<span class="hljs-string">'tags'</span>][<span class="hljs-string">'type'</span>] == <span class="hljs-string">'boundary'</span>:
+            <span class="hljs-keyword">return</span> f
+
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_features_inside_shape</span><span class="hljs-params">(geojson_data, border_shape)</span>:</span>
+    optimized_shapes = katana(border_shape, SPLIT_SIZE)
+    tree = STRtree(optimized_shapes)
+
+    inside_shape = []
+    <span class="hljs-keyword">for</span> feature <span class="hljs-keyword">in</span> geojson_data[<span class="hljs-string">'features'</span>]:
+        shape = geometry.shape(feature[<span class="hljs-string">'geometry'</span>])
+        <span class="hljs-keyword">for</span> segment <span class="hljs-keyword">in</span> tree.query(shape):
+            <span class="hljs-keyword">if</span> segment.contains(shape):
+                inside_shape.append(feature)
+    geojson_data[<span class="hljs-string">'features'</span>] = inside_shape
+    <span class="hljs-keyword">return</span> geojson_data
+
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_fishing_places_in_country</span><span class="hljs-params">(name)</span>:</span>
+    border = get_country_border(name)
+    border_shape = geometry.shape(border[<span class="hljs-string">'geometry'</span>])
+    minlon, minlat, maxlon, maxlat = border_shape.bounds
+    bbox = <span class="hljs-string">f"(<span class="hljs-subst">{minlat}</span>, <span class="hljs-subst">{minlon}</span>, <span class="hljs-subst">{maxlat}</span>, <span class="hljs-subst">{maxlon}</span>)"</span>
+
+    tags = [<span class="hljs-string">'leisure=fishing'</span>] + [<span class="hljs-string">f"fishing=<span class="hljs-subst">{v}</span>"</span> <span class="hljs-keyword">for</span> v <span class="hljs-keyword">in</span> [<span class="hljs-string">'yes'</span>, <span class="hljs-string">'private'</span>, <span class="hljs-string">'permissive'</span>]]
+    queries = []
+    <span class="hljs-keyword">for</span> geom_t <span class="hljs-keyword">in</span> [<span class="hljs-string">'node'</span>, <span class="hljs-string">'way'</span>, <span class="hljs-string">'relation'</span>]:
+        <span class="hljs-keyword">for</span> tag <span class="hljs-keyword">in</span> tags:
+            queries.append(<span class="hljs-string">f"<span class="hljs-subst">{geom_t}</span>[<span class="hljs-subst">{tag}</span>]<span class="hljs-subst">{bbox}</span>;"</span>)
+
+    print(<span class="hljs-string">"Loading all information about fishing places from overpass..."</span>)
+    data = overpass_call(<span class="hljs-string">f"""
+        [out:json];
+        (
+            <span class="hljs-subst">{<span class="hljs-string">""</span>.join(queries)}</span>
+            &lt;;
+        );
+        out geom;
+    """</span>)
+
+    geojson_data = json2geojson(data, filter_used_refs=<span class="hljs-literal">False</span>)
+    print(<span class="hljs-string">f"Find all geometries inside <span class="hljs-subst">{name}</span>"</span>)
+    geojson_data = get_features_inside_shape(geojson_data, border_shape)
+    print(<span class="hljs-string">"Count of features:"</span>, len(geojson_data[<span class="hljs-string">'features'</span>]))
+    <span class="hljs-keyword">return</span> geojson_data
+
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">save_data</span><span class="hljs-params">(data, geom_file)</span>:</span>
+    json_data = json.dumps(data, indent=<span class="hljs-number">2</span>)
+    f = codecs.open(geom_file, <span class="hljs-string">'w'</span>)
+    f.write(json_data)
+    f.close()
+    print(<span class="hljs-string">"Data saved to"</span>, geom_file)
+
+
+data = get_fishing_places_in_country(<span class="hljs-string">"Ukraine"</span>)
+save_data(data, <span class="hljs-string">'fishing_places_ukraine.geojson'</span>)</code></pre>
+<p>In this code you can notice some optimizations inside <code>get_features_inside_shape</code>. We need this to perform geospatial queries (like intersection) faster. Here used <code>katana</code> method to split large geometries into parts, you can find more information in this article <a href="https://snorfalorpagus.net/blog/2016/03/13/splitting-large-polygons-for-faster-intersections/" target="_blank" rel="noopener" >Splitting large polygons for faster intersections</a>. Other optimization is R-tree packed using the Sort-Tile-Recursive algorithm (<a href="https://shapely.readthedocs.io/en/stable/manual.html#str-packed-r-tree" target="_blank" rel="noopener" >documentation about STRtree in shapely</a>).</p>
+<p>Visualisation of generated dataset:</p>
+<iframe title="Інтерактивна карта зі згладженими класифікованими зонами" class="lazyload" data-src="https://aspectum.com/app/maps/embed/fb73004f-8ba0-44e4-b2ff-8021b7dfe92c" width="960" height="600" frameborder="0" style="border: 0"></iframe>
+
+<p>This map shows that the number of places suitable for fishing is very small (although in reality there are many more). And this is even more motivating to add new information to the OSM.</p>
+<p><em>* All code in this article provided under MIT license</em></p>
+</main></div><footer>© Mikola Parfenyuck<div class="social-links"><a class="icon icon-twitter" rel="noopener" target="_blank" aria-label="My twitter" title="My twitter" href="https://twitter.com/i_rapkin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72"><path d="M67.812 16.141a26.246 26.246 0 0 1-7.519 2.06 13.134 13.134 0 0 0 5.756-7.244 26.127 26.127 0 0 1-8.313 3.176A13.075 13.075 0 0 0 48.182 10c-7.229 0-13.092 5.861-13.092 13.093 0 1.026.118 2.021.338 2.981-10.885-.548-20.528-5.757-26.987-13.679a13.048 13.048 0 0 0-1.771 6.581c0 4.542 2.312 8.551 5.824 10.898a13.048 13.048 0 0 1-5.93-1.638c-.002.055-.002.11-.002.162 0 6.345 4.513 11.638 10.504 12.84a13.177 13.177 0 0 1-3.449.457c-.846 0-1.667-.078-2.465-.231 1.667 5.2 6.499 8.986 12.23 9.09a26.276 26.276 0 0 1-16.26 5.606A26.21 26.21 0 0 1 4 55.976a37.036 37.036 0 0 0 20.067 5.882c24.083 0 37.251-19.949 37.251-37.249 0-.566-.014-1.134-.039-1.694a26.597 26.597 0 0 0 6.533-6.774z"></path></svg>
+</a><a class="icon icon-github" rel="noopener" target="_blank" aria-label="My github" title="My github" href="https://github.com/rapkin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg>
+</a></div></footer><script src="/assets/js/bundle.js"></script></body></html>
