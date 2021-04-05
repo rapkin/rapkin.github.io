@@ -17,11 +17,11 @@
 </li>
 <li><p><strong>Overpass</strong> — API щоб завантажувати, фільтрувати чи трансформувати дані з OSM.</p>
 </li>
-<li><p><strong>Osm2geojson</strong> — бібліотека для конвертації даних OSM (та Overpass) в геометрію. Більше деталей в репозиторії <a href="https://github.com/aspectumapp/osm2geojson" target="_blank" rel="noopener" >aspectumapp/osm2geojson</a></p>
+<li><p><strong>Osm2geojson</strong> — бібліотека для конвертації даних OSM (та Overpass) в геометрію. Більше деталей в репозиторії <a href="https://github.com/aspectumapp/osm2geojson" target="_blank" rel="noopener noreferrer" >aspectumapp/osm2geojson</a></p>
 </li>
-<li><p><strong>Land polygons</strong> — датасет берегової лінії <a href="https://osmdata.openstreetmap.de/data/land-polygons.html" target="_blank" rel="noopener" >osmdata/land-polygons</a></p>
+<li><p><strong>Land polygons</strong> — датасет берегової лінії <a href="https://osmdata.openstreetmap.de/data/land-polygons.html" target="_blank" rel="noopener noreferrer" >osmdata/land-polygons</a></p>
 </li>
-<li><p><strong>Aspectum</strong> — сервіс для візуалізації та аналізу картографічної інформації. Можна скористатись і geojson.io, але при великій кількості геометрію можуть виникати проблеми з продуктивністю. Часто можна замінити інтерфейсом QGIS. Сторінка сервісу <a href="https://aspectum.com" target="_blank" rel="noopener" >aspectum.com</a></p>
+<li><p><strong>Aspectum</strong> — сервіс для візуалізації та аналізу картографічної інформації. Можна скористатись і geojson.io, але при великій кількості геометрію можуть виникати проблеми з продуктивністю. Часто можна замінити інтерфейсом QGIS. Сторінка сервісу <a href="https://aspectum.com" target="_blank" rel="noopener noreferrer" >aspectum.com</a></p>
 </li>
 </ul>
 <h2 id="що-конкретно-ми-хочемо-отримати">Що конкретно ми хочемо отримати?</h2>
@@ -66,7 +66,7 @@
 <p>Варто зазначити, що в деяких місцях порядок не обов&#39;язковий і є можливість асинхронно виконувати якісь завдання (наприклад завантаження інформації, або робота з кожним класом геометрії).</p>
 <p>Тепер можна детальніше привести приклади коду для кожного пункту.</p>
 <h2 id="завантаження-даних-з-osm">Завантаження даних з OSM</h2>
-<p>Не зміг знайти хорошої бібліотеки аби відпарсити дані OSM (якщо я погано шукав, то поділіться такою бібліотекою в коментарях), тому щоб сформувати необхідну геометрію я написав бібліотеку <a href="https://github.com/aspectumapp/osm2geojson" target="_blank" rel="noopener" >osm2geojson</a>, яка перетворює OSM/Overpass XML в геометрію Shapely або GeoJSON.
+<p>Не зміг знайти хорошої бібліотеки аби відпарсити дані OSM (якщо я погано шукав, то поділіться такою бібліотекою в коментарях), тому щоб сформувати необхідну геометрію я написав бібліотеку <a href="https://github.com/aspectumapp/osm2geojson" target="_blank" rel="noopener noreferrer" >osm2geojson</a>, яка перетворює OSM/Overpass XML в геометрію Shapely або GeoJSON.
 Звичайно, можна скористатись бібліотекою GDAL, але процес встановлення занадто складний.</p>
 <p>Отож отримати межу міста можна простим запитом до API Overpass:</p>
 <pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_city_border</span>(<span class="hljs-params">city_id</span>):</span>
@@ -147,8 +147,8 @@
 <h2 id="формування-початкової-геометрії">Формування початкової геометрії</h2>
 <p>Як було сказано раніше, робота з лінійною та полігональною геометріями відрізняється — адже полігони займають певну площу, а от для лінійної геометрію цю площу потрібно якось побудувати — перетворити лінію на полігон певного розміру, який би відповідав розмірам реального об’єкту.
 Аби зробити це перетворення можна використати операцію буферизації — грубо кажучи це розширення лінії.
-В документації Shapely більше деталей по роботі цього методу <a href="https://shapely.readthedocs.io/en/stable/manual.html#object.buffer" target="_blank" rel="noopener" >shapely/object.buffer</a>.</p>
-<p>З підбором розміру цього буферу теж все доволі просто — для різних видів доріг в OSM є свої теги і детальний опис як їх потрібно використовувати, наприклад, для доріг в Україні можна скористатись класифікацією з <a href="https://wiki.openstreetmap.org/wiki/Uk:%D0%92%D1%96%D0%BA%D1%96%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82_%D0%A3%D0%BA%D1%80%D0%B0%D1%97%D0%BD%D0%B0/%D0%9A%D0%BB%D0%B0%D1%81%D0%B8%D1%84%D1%96%D0%BA%D0%B0%D1%86%D1%96%D1%8F_%D0%B4%D0%BE%D1%80%D1%96%D0%B3" target="_blank" rel="noopener" >вікі OSM</a> (для інших країн теж існують подібні класифікації).
+В документації Shapely більше деталей по роботі цього методу <a href="https://shapely.readthedocs.io/en/stable/manual.html#object.buffer" target="_blank" rel="noopener noreferrer" >shapely/object.buffer</a>.</p>
+<p>З підбором розміру цього буферу теж все доволі просто — для різних видів доріг в OSM є свої теги і детальний опис як їх потрібно використовувати, наприклад, для доріг в Україні можна скористатись класифікацією з <a href="https://wiki.openstreetmap.org/wiki/Uk:%D0%92%D1%96%D0%BA%D1%96%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82_%D0%A3%D0%BA%D1%80%D0%B0%D1%97%D0%BD%D0%B0/%D0%9A%D0%BB%D0%B0%D1%81%D0%B8%D1%84%D1%96%D0%BA%D0%B0%D1%86%D1%96%D1%8F_%D0%B4%D0%BE%D1%80%D1%96%D0%B3" target="_blank" rel="noopener noreferrer" >вікі OSM</a> (для інших країн теж існують подібні класифікації).
 А самі значення розміру дорожньої смуги можна знайти в державних стандартах (для більшості країн значення часто однакові).</p>
 <p>Для побудови буферів слугує функція build_buffer_on_lines, яка виконує побудову квадратного буфера.
 Цей вид буферу найкраще підходить для нашого випадку (по якості результату та кількості обчислень).</p>
@@ -212,15 +212,15 @@
 Визначення пріоритетності кожного класу не зовсім очевидне завдання, наприклад водні об’єкти мають найнижчий пріоритет, бо зазвичай дорожні та залізничні шляхи проходять над річками і т.д..</p>
 <p>А от з дорогами та залізницею все трохи складніше, бо дорожні мости можуть проходити над залізничними шляхами, так і навпаки — залізничні мости над дорожніми шляхами.
 Але все ж краще виявилось надавати дорогам вищий пріоритет (кількість правильно розміченої території буде більша).
-Є і більш складна схема розподілу отриманої геометрії на шари, яка описана тут <a href="https://wiki.openstreetmap.org/wiki/Key:layer" target="_blank" rel="noopener" >wiki.osm/Key:layer</a>.
+Є і більш складна схема розподілу отриманої геометрії на шари, яка описана тут <a href="https://wiki.openstreetmap.org/wiki/Key:layer" target="_blank" rel="noopener noreferrer" >wiki.osm/Key:layer</a>.
 Мінусом цього підходу у нашому випадку — значний ріст кількості обчислень.</p>
 <p><div class="lazyload" style="padding-bottom: 100%" data-bg="url(/assets/optimized-img/layers.png)" title="Результат накладання шарів"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/layers.png"></a></div></p>
 <p>Одним з важливих етапів в обрахунках є етап оптимізації геометрії.
 Необхідність цього виникає по причині надзвичайно великих полігонів доріг та водних об’єктів (інколи сітка доріг покриває ледь не все місто і формує один полігон).
 Використання такої геометрії призводить до неконтрольованого росту складності обчислень (на великих містах це може займати кілька діб).
-Щоб позбутись цієї проблеми можна просто розбивати великі полігони на менші. Вивчаючи цю тему я натрапив на корисну <a href="https://snorfalorpagus.net/blog/2016/03/13/splitting-large-polygons-for-faster-intersections/" target="_blank" rel="noopener" >статтю</a>, де теж вирішувалась ця проблема.
+Щоб позбутись цієї проблеми можна просто розбивати великі полігони на менші. Вивчаючи цю тему я натрапив на корисну <a href="https://snorfalorpagus.net/blog/2016/03/13/splitting-large-polygons-for-faster-intersections/" target="_blank" rel="noopener noreferrer" >статтю</a>, де теж вирішувалась ця проблема.
 Саме цей алгоритм розбиття я і використав.</p>
-<p>Ще одна важлива частина оптимізації це побудова індексу над наборами полігонів (детальніше про це можна почитати в <a href="https://geoffboeing.com/2016/10/r-tree-spatial-index-python/" target="_blank" rel="noopener" >цій статті</a>).
+<p>Ще одна важлива частина оптимізації це побудова індексу над наборами полігонів (детальніше про це можна почитати в <a href="https://geoffboeing.com/2016/10/r-tree-spatial-index-python/" target="_blank" rel="noopener noreferrer" >цій статті</a>).
 В бібліотеці Shapely вже вбудований хороший алгоритм для індексації геометрії STRtree (Sort-Tile-Recursive algorithm).
 Код для обчислення пересічення та різниці полігонів трохи ускладниться (бо потрібно додати етап індексації та пошуку полігонів у індексі), але досить просто виділити ці операції в окремі методи</p>
 <pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">optimized_intersection</span>(<span class="hljs-params">a, b</span>):</span>
@@ -400,7 +400,7 @@
 <p>Ще одним місцем для оптимізації є інтерпретатор Python.
 Значна кількість обчислень в бібліотеці Shapely і так винесена в нативне розширення (основними операціями з геометрією займається бібліотека GEOS, яка написана на C++).
 Але в нашому коді також є велика кількість обрахунків на стороні python.
-На щастя не так складно виявилось реалізувати компіляцію всього коду в нативне розширення за допомогою <a href="https://cython.org/" target="_blank" rel="noopener" >Cython</a>.</p>
+На щастя не так складно виявилось реалізувати компіляцію всього коду в нативне розширення за допомогою <a href="https://cython.org/" target="_blank" rel="noopener noreferrer" >Cython</a>.</p>
 <h2 id="висновки">Висновки</h2>
 <p>Використання відкритих векторних даних може дати непоганий результат, але в процесі часто виникають проблеми з неправильною геометрією та нерівномірністю розмітки.
 В деяких задачах гостро встає проблема складності обрахунків і швидкодії.
