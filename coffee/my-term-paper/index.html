@@ -261,7 +261,7 @@
 <p>Розпочнемо з <strong>авторизації</strong>.
 Спершу потрібно написати функцію, яка <strong>зберігатиме користувача</strong> в базі даних:</p>
 <pre><code data-lang="coffeescript" class="hljs"><span class="hljs-function"><span class="hljs-title">save_user</span> = <span class="hljs-params">(name, pass)</span> -&gt;</span>
-  time = Date.now()
+  time = <span class="hljs-built_in">Date</span>.now()
   db.users.save
     name: name
     pass: pass_hash(pass, time)
@@ -280,13 +280,13 @@
 <p>А сам запит до БД виглядав би приблизно так:</p>
 <pre><code data-lang="sql" class="hljs"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> <span class="hljs-keyword">users</span> <span class="hljs-keyword">VALUES</span> (
   <span class="hljs-literal">NULL</span>,
-  <span class="hljs-string">"name"</span>,
-  <span class="hljs-string">"password"</span>,
-  <span class="hljs-string">"time"</span>
+  <span class="hljs-string">&quot;name&quot;</span>,
+  <span class="hljs-string">&quot;password&quot;</span>,
+  <span class="hljs-string">&quot;time&quot;</span>
 )</code></pre>
 <p>Тут і проявляється вся зручність MongoDB.</p>
 <p>Тепер можна створити функцію, яка займається обробкою переданих через API параметрів:</p>
-<pre><code data-lang="coffeescript" class="hljs">app.post <span class="hljs-string">'/register'</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
+<pre><code data-lang="coffeescript" class="hljs">app.post <span class="hljs-string">&#x27;/register&#x27;</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
   regex = <span class="hljs-regexp">/^[a-z0-9_]{3,42}$/</span>
   name = req.body.name.trim()
   pass = req.body.pass.trim()
@@ -295,27 +295,27 @@
     db.users.findOne {name: name}, <span class="hljs-function"><span class="hljs-params">(user)</span> -&gt;</span>
       <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> user?
         save_user name, pass
-        res.cookie <span class="hljs-string">'snake_user_name'</span>, name
-        res.redirect <span class="hljs-string">'/'</span>
-      <span class="hljs-keyword">else</span> res.redirect <span class="hljs-string">'/register'</span>
-  <span class="hljs-keyword">else</span> res.redirect <span class="hljs-string">'/register'</span></code></pre>
+        res.cookie <span class="hljs-string">&#x27;snake_user_name&#x27;</span>, name
+        res.redirect <span class="hljs-string">&#x27;/&#x27;</span>
+      <span class="hljs-keyword">else</span> res.redirect <span class="hljs-string">&#x27;/register&#x27;</span>
+  <span class="hljs-keyword">else</span> res.redirect <span class="hljs-string">&#x27;/register&#x27;</span></code></pre>
 <p>Тут отримані параметри було перевірено на валідність, далі йде перевірка чи ім&#39;я цього користувача ще не зайняте (існує у базі даних) і тільки після цього користувач зберігається у базі даних.</p>
 <p>Коли користувач зареєстрований необхідно передбачити <strong>вхід</strong>.</p>
-<pre><code data-lang="coffeescript" class="hljs">app.post <span class="hljs-string">'/login'</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
+<pre><code data-lang="coffeescript" class="hljs">app.post <span class="hljs-string">&#x27;/login&#x27;</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
   name = req.body.name.trim()
   pass = req.body.pass.trim()
 
   db.users.findOne {name: name}, <span class="hljs-function"><span class="hljs-params">(user)</span> -&gt;</span>
     <span class="hljs-keyword">if</span> user.pass <span class="hljs-keyword">is</span> pass_hash(pass, user.time)
-      res.cookie <span class="hljs-string">'snake_user_name'</span>, name
-      res.redirect <span class="hljs-string">'/'</span>
-    <span class="hljs-keyword">else</span> res.redirect <span class="hljs-string">'/login'</span></code></pre>
+      res.cookie <span class="hljs-string">&#x27;snake_user_name&#x27;</span>, name
+      res.redirect <span class="hljs-string">&#x27;/&#x27;</span>
+    <span class="hljs-keyword">else</span> res.redirect <span class="hljs-string">&#x27;/login&#x27;</span></code></pre>
 <p>Де перевіряємо на наявність у базі даних пари імені та пароля.
 І тільки тоді надаємо доступ.</p>
 <p>Функція виходу дуже проста:</p>
-<pre><code data-lang="coffeescript" class="hljs">app.get <span class="hljs-string">'/logout'</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
-  res.clearCookie <span class="hljs-string">'snake_user_name'</span>
-  res.redirect <span class="hljs-string">'/'</span></code></pre>
+<pre><code data-lang="coffeescript" class="hljs">app.get <span class="hljs-string">&#x27;/logout&#x27;</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
+  res.clearCookie <span class="hljs-string">&#x27;snake_user_name&#x27;</span>
+  res.redirect <span class="hljs-string">&#x27;/&#x27;</span></code></pre>
 <p>З автентифікацією завершено, можна перейти до <strong>додавання рівнів</strong>.</p>
 <pre><code data-lang="coffeescript" class="hljs"><span class="hljs-function"><span class="hljs-title">save_level</span> = <span class="hljs-params">(level, user_name, lvl_name, cur_user = user_name)</span> -&gt;</span>
   <span class="hljs-keyword">return</span> <span class="hljs-keyword">if</span> user_name <span class="hljs-keyword">isnt</span> cur_user
@@ -356,37 +356,37 @@
 А вкінці і проявився callback-hell.</p>
 <p>Тепер потрібно передбачити обробники обох ситуацій.
 Для <strong>додавання рівня</strong> є обробник:</p>
-<pre><code data-lang="coffeescript" class="hljs">app.post <span class="hljs-string">'/new_level'</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
+<pre><code data-lang="coffeescript" class="hljs">app.post <span class="hljs-string">&#x27;/new_level&#x27;</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
   lvl_name = req.body.name.trim()
   <span class="hljs-keyword">if</span> lvl_name.match(<span class="hljs-regexp">/^[a-z0-9_]{1,23}$/</span>)
     save_level get_lvl_from_file(<span class="hljs-number">1</span>), user, lvl_name, user</code></pre>
 <p>Для <strong>збереження існуючого рівня</strong>:</p>
-<pre><code data-lang="coffeescript" class="hljs">app.post <span class="hljs-string">'/save_level/:user/:level'</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
-  user = req.cookies.snake_user_name <span class="hljs-keyword">or</span> <span class="hljs-string">'default'</span>
+<pre><code data-lang="coffeescript" class="hljs">app.post <span class="hljs-string">&#x27;/save_level/:user/:level&#x27;</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
+  user = req.cookies.snake_user_name <span class="hljs-keyword">or</span> <span class="hljs-string">&#x27;default&#x27;</span>
   level = req.body
-  <span class="hljs-keyword">if</span> user <span class="hljs-keyword">isnt</span> <span class="hljs-string">'default'</span>
+  <span class="hljs-keyword">if</span> user <span class="hljs-keyword">isnt</span> <span class="hljs-string">&#x27;default&#x27;</span>
     save_level level, req.params.user, req.params.level, user</code></pre>
 <p>Коли є рівні, а їх може бути багато, потрібно подумати як виводити їх список.
 <strong>Список усіх рівнів</strong> буде виводитись на початковому екрані.
 І відповідно обробник виглядатиме так:</p>
-<pre><code data-lang="coffeescript" class="hljs">app.get <span class="hljs-string">'/'</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
-  name = req.cookies.snake_user_name <span class="hljs-keyword">or</span> <span class="hljs-string">'default'</span>
+<pre><code data-lang="coffeescript" class="hljs">app.get <span class="hljs-string">&#x27;/&#x27;</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
+  name = req.cookies.snake_user_name <span class="hljs-keyword">or</span> <span class="hljs-string">&#x27;default&#x27;</span>
   db.users.findOne {name: name}, <span class="hljs-function"><span class="hljs-params">(user)</span> -&gt;</span>
     db.levels.find(uid: user._id).sort {name: <span class="hljs-number">1</span>}, <span class="hljs-function"><span class="hljs-params">(levels)</span> -&gt;</span>
       names = <span class="hljs-keyword">for</span> lvl <span class="hljs-keyword">in</span> levels <span class="hljs-keyword">then</span> lvl.name
-      res.render <span class="hljs-string">'levels'</span>, levels: names, user: name</code></pre>
+      res.render <span class="hljs-string">&#x27;levels&#x27;</span>, levels: names, user: name</code></pre>
 <p>По цьому списку можна перейти на якийсь окремий рівень.
 Для <strong>відображення рівня</strong> є обробник:</p>
-<pre><code data-lang="coffeescript" class="hljs">app.get <span class="hljs-string">'/:user/:level'</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
-  user_name = req.cookies.snake_user_name <span class="hljs-keyword">or</span> <span class="hljs-string">'default'</span>
+<pre><code data-lang="coffeescript" class="hljs">app.get <span class="hljs-string">&#x27;/:user/:level&#x27;</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
+  user_name = req.cookies.snake_user_name <span class="hljs-keyword">or</span> <span class="hljs-string">&#x27;default&#x27;</span>
   level = req.params.level
   db.users.findOne {name: req.params.user}, <span class="hljs-function"><span class="hljs-params">(user)</span> -&gt;</span>
     db.levels.findOne {name: level, uid: user._id}, <span class="hljs-function"><span class="hljs-params">(lvl)</span> -&gt;</span>
-      res.render <span class="hljs-string">'game'</span>, lvl <span class="hljs-keyword">if</span> lvl?</code></pre>
+      res.render <span class="hljs-string">&#x27;game&#x27;</span>, lvl <span class="hljs-keyword">if</span> lvl?</code></pre>
 <p>Рівень є, користувач є, залишилась робота з рекордами.
 Так <strong>зберігаємо рекорд</strong> (для заданого користувача на заданому рівні):</p>
 <pre><code data-lang="coffeescript" class="hljs"><span class="hljs-function"><span class="hljs-title">save_score</span> = <span class="hljs-params">(score, user_name, lvl_name)</span> -&gt;</span>
-  <span class="hljs-keyword">return</span> <span class="hljs-keyword">if</span> user_name <span class="hljs-keyword">is</span> <span class="hljs-string">'default'</span>
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">if</span> user_name <span class="hljs-keyword">is</span> <span class="hljs-string">&#x27;default&#x27;</span>
   db.users.findOne {name: user_name}, <span class="hljs-function"><span class="hljs-params">(user)</span> -&gt;</span>
     db.levels.findOne {name: lvl_name, uid: user._id}, <span class="hljs-function"><span class="hljs-params">(lvl)</span> -&gt;</span>
       db.scores.findOne {uid: user._id, lid: lvl._id}, <span class="hljs-function"><span class="hljs-params">(last_score)</span> -&gt;</span>
@@ -395,16 +395,16 @@
           score.uid = user._id
           score.lid = lvl._id
           score._id = last_score._id
-        score.time = Date.now()
+        score.time = <span class="hljs-built_in">Date</span>.now()
         db.scores.save score</code></pre>
 <p>І невеличкий обробник:</p>
-<pre><code data-lang="coffeescript" class="hljs">app.post <span class="hljs-string">'/save_score/:user/:level'</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
+<pre><code data-lang="coffeescript" class="hljs">app.post <span class="hljs-string">&#x27;/save_score/:user/:level&#x27;</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
   score = req.body
   save_score score, req.params.user, req.params.level</code></pre>
 <p>Ну і останнім є <strong>видалення рівня</strong>.
 Так його можна видалити:</p>
-<pre><code data-lang="coffeescript" class="hljs">app.get <span class="hljs-string">'/delete_level/:user/:name'</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
-  <span class="hljs-keyword">return</span> <span class="hljs-keyword">if</span> req.params.user <span class="hljs-keyword">is</span> <span class="hljs-string">'default'</span>
+<pre><code data-lang="coffeescript" class="hljs">app.get <span class="hljs-string">&#x27;/delete_level/:user/:name&#x27;</span>, <span class="hljs-function"><span class="hljs-params">(req, res)</span> -&gt;</span>
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">if</span> req.params.user <span class="hljs-keyword">is</span> <span class="hljs-string">&#x27;default&#x27;</span>
   db.users.findOne {name: req.params.user}, <span class="hljs-function"><span class="hljs-params">(user)</span> -&gt;</span>
     db.levels.findOne {uid: user._id, name: req.params.name}, <span class="hljs-function"><span class="hljs-params">(lvl)</span> -&gt;</span>
       db.scores.remove {lid: lvl._id}
