@@ -21,7 +21,7 @@ out geom;</code></pre>
 To do this we should download boundary of country and find intersections with this boundary for all fishing places.</p>
 <p>The easiest way is to run Overpass-query with name of a country:</p>
 <pre><code data-lang="R" class="hljs">[out:json];
-rel[admin_level=<span class="hljs-number">2</span>][<span class="hljs-string">&quot;name:en&quot;</span>=<span class="hljs-string">&quot;Ukraine&quot;</span>];
+rel[admin_level=<span class="hljs-number">2</span>][<span class="hljs-string">"name:en"</span>=<span class="hljs-string">"Ukraine"</span>];
 out geom;</code></pre>
 <p><div class="lazyload" style="padding-bottom: 72.08524864187213%" data-bg="url(/assets/optimized-img/ukraine-border-overpass.png)" title="Ukrainian border in overpass"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/ukraine-border-overpass.png"></a></div></p>
 <p>When we have border of country we can find all geometries that have intersection with country polygon (or multipolygon). To convert OSM data (loaded with overpass) I use <a href="https://github.com/aspectumapp/osm2geojson" target="_blank" rel="noopener noreferrer" >osm2geojson</a>.
@@ -35,15 +35,15 @@ Here full example on python how to download data from Overpass and convert it to
 <span class="hljs-keyword">from</span> shapely.strtree <span class="hljs-keyword">import</span> STRtree
 <span class="hljs-keyword">from</span> osm2geojson <span class="hljs-keyword">import</span> json2geojson
 
-OVERPASS = <span class="hljs-string">&quot;https://overpass-api.de/api/interpreter/&quot;</span>
+OVERPASS = <span class="hljs-string">"https://overpass-api.de/api/interpreter/"</span>
 SPLIT_SIZE = <span class="hljs-number">1.5</span> <span class="hljs-comment"># optimal value for countries</span>
 
 
 <span class="hljs-comment"># source from https://snorfalorpagus.net/blog/2016/03/13/splitting-large-polygons-for-faster-intersections/</span>
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">katana</span>(<span class="hljs-params">shape, threshold, count=<span class="hljs-number">0</span></span>):</span>
-    <span class="hljs-string">&quot;&quot;&quot;Split a Polygon into two parts across it&#x27;s shortest dimension&quot;&quot;&quot;</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">katana</span><span class="hljs-params">(shape, threshold, count=<span class="hljs-number">0</span>)</span>:</span>
+    <span class="hljs-string">"""Split a Polygon into two parts across it's shortest dimension"""</span>
     bounds = shape.bounds
-    <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(bounds) == <span class="hljs-number">0</span>:
+    <span class="hljs-keyword">if</span> len(bounds) == <span class="hljs-number">0</span>:
         <span class="hljs-comment"># emptry geometry, usual situation</span>
         width = <span class="hljs-number">0</span>
         height = <span class="hljs-number">0</span>
@@ -51,7 +51,7 @@ SPLIT_SIZE = <span class="hljs-number">1.5</span> <span class="hljs-comment"># o
         width = bounds[<span class="hljs-number">2</span>] - bounds[<span class="hljs-number">0</span>]
         height = bounds[<span class="hljs-number">3</span>] - bounds[<span class="hljs-number">1</span>]
 
-    <span class="hljs-keyword">if</span> <span class="hljs-built_in">max</span>(width, height) &lt;= threshold <span class="hljs-keyword">or</span> count == <span class="hljs-number">250</span>:
+    <span class="hljs-keyword">if</span> max(width, height) &lt;= threshold <span class="hljs-keyword">or</span> count == <span class="hljs-number">250</span>:
         <span class="hljs-comment"># either the polygon is smaller than the threshold, or the maximum</span>
         <span class="hljs-comment"># number of recursions has been reached</span>
         <span class="hljs-keyword">return</span> [shape]
@@ -66,103 +66,103 @@ SPLIT_SIZE = <span class="hljs-number">1.5</span> <span class="hljs-comment"># o
     result = []
     <span class="hljs-keyword">for</span> d <span class="hljs-keyword">in</span> (a, b,):
         c = shape.intersection(d)
-        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-built_in">isinstance</span>(c, geometry.GeometryCollection):
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> isinstance(c, geometry.GeometryCollection):
             c = [c]
         <span class="hljs-keyword">for</span> e <span class="hljs-keyword">in</span> c:
-            <span class="hljs-keyword">if</span> <span class="hljs-built_in">isinstance</span>(e, (geometry.Polygon, geometry.MultiPolygon)):
+            <span class="hljs-keyword">if</span> isinstance(e, (geometry.Polygon, geometry.MultiPolygon)):
                 result.extend(katana(e, threshold, count+<span class="hljs-number">1</span>))
     <span class="hljs-keyword">if</span> count &gt; <span class="hljs-number">0</span>:
         <span class="hljs-keyword">return</span> result
     <span class="hljs-comment"># convert multipart into singlepart</span>
     final_result = []
     <span class="hljs-keyword">for</span> g <span class="hljs-keyword">in</span> result:
-        <span class="hljs-keyword">if</span> <span class="hljs-built_in">isinstance</span>(g, geometry.MultiPolygon):
+        <span class="hljs-keyword">if</span> isinstance(g, geometry.MultiPolygon):
             final_result.extend(g)
         <span class="hljs-keyword">else</span>:
             final_result.append(g)
     <span class="hljs-keyword">return</span> final_result
 
 
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">overpass_call</span>(<span class="hljs-params">query</span>):</span>
-    encoded = urllib.parse.quote(query.encode(<span class="hljs-string">&#x27;utf-8&#x27;</span>), safe=<span class="hljs-string">&#x27;~()*!.\&#x27;&#x27;</span>)
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">overpass_call</span><span class="hljs-params">(query)</span>:</span>
+    encoded = urllib.parse.quote(query.encode(<span class="hljs-string">'utf-8'</span>), safe=<span class="hljs-string">'~()*!.\''</span>)
     r = requests.post(OVERPASS,
-                      data=<span class="hljs-string">f&quot;data=<span class="hljs-subst">{encoded}</span>&quot;</span>,
-                      headers={<span class="hljs-string">&#x27;Content-Type&#x27;</span>: <span class="hljs-string">&#x27;application/x-www-form-urlencoded; charset=UTF-8&#x27;</span>})
+                      data=<span class="hljs-string">f"data=<span class="hljs-subst">{encoded}</span>"</span>,
+                      headers={<span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/x-www-form-urlencoded; charset=UTF-8'</span>})
     <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> r.status_code <span class="hljs-keyword">is</span> <span class="hljs-number">200</span>:
-        <span class="hljs-keyword">raise</span> requests.exceptions.HTTPError(<span class="hljs-string">&#x27;Overpass server respond with status &#x27;</span>+<span class="hljs-built_in">str</span>(r.status_code))
+        <span class="hljs-keyword">raise</span> requests.exceptions.HTTPError(<span class="hljs-string">'Overpass server respond with status '</span>+str(r.status_code))
     <span class="hljs-keyword">return</span> r.text
 
 
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_country_border</span>(<span class="hljs-params">name</span>):</span>
-    print(<span class="hljs-string">f&quot;Loading border of <span class="hljs-subst">{name}</span>...&quot;</span>)
-    data = overpass_call(<span class="hljs-string">f&quot;&quot;&quot;
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_country_border</span><span class="hljs-params">(name)</span>:</span>
+    print(<span class="hljs-string">f"Loading border of <span class="hljs-subst">{name}</span>..."</span>)
+    data = overpass_call(<span class="hljs-string">f"""
         [out:json];
-        rel[admin_level=2][&quot;name:en&quot;=&quot;<span class="hljs-subst">{name}</span>&quot;];
+        rel[admin_level=2]["name:en"="<span class="hljs-subst">{name}</span>"];
         out geom;
-    &quot;&quot;&quot;</span>)
+    """</span>)
     geojson_data = json2geojson(data)
 
-    print(<span class="hljs-string">f&quot;Country border loaded!&quot;</span>)
-    <span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> geojson_data[<span class="hljs-string">&#x27;features&#x27;</span>]:
-        <span class="hljs-keyword">if</span> f[<span class="hljs-string">&#x27;properties&#x27;</span>][<span class="hljs-string">&#x27;tags&#x27;</span>][<span class="hljs-string">&#x27;type&#x27;</span>] == <span class="hljs-string">&#x27;boundary&#x27;</span>:
+    print(<span class="hljs-string">f"Country border loaded!"</span>)
+    <span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> geojson_data[<span class="hljs-string">'features'</span>]:
+        <span class="hljs-keyword">if</span> f[<span class="hljs-string">'properties'</span>][<span class="hljs-string">'tags'</span>][<span class="hljs-string">'type'</span>] == <span class="hljs-string">'boundary'</span>:
             <span class="hljs-keyword">return</span> f
 
     <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
 
 
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_features_inside_shape</span>(<span class="hljs-params">geojson_data, border_shape</span>):</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_features_inside_shape</span><span class="hljs-params">(geojson_data, border_shape)</span>:</span>
     optimized_shapes = katana(border_shape, SPLIT_SIZE)
     tree = STRtree(optimized_shapes)
 
     inside_shape = []
-    <span class="hljs-keyword">for</span> feature <span class="hljs-keyword">in</span> geojson_data[<span class="hljs-string">&#x27;features&#x27;</span>]:
-        shape = geometry.shape(feature[<span class="hljs-string">&#x27;geometry&#x27;</span>])
+    <span class="hljs-keyword">for</span> feature <span class="hljs-keyword">in</span> geojson_data[<span class="hljs-string">'features'</span>]:
+        shape = geometry.shape(feature[<span class="hljs-string">'geometry'</span>])
         <span class="hljs-keyword">for</span> segment <span class="hljs-keyword">in</span> tree.query(shape):
             <span class="hljs-keyword">if</span> segment.contains(shape):
                 inside_shape.append(feature)
-    geojson_data[<span class="hljs-string">&#x27;features&#x27;</span>] = inside_shape
+    geojson_data[<span class="hljs-string">'features'</span>] = inside_shape
     <span class="hljs-keyword">return</span> geojson_data
 
 
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_fishing_places_in_country</span>(<span class="hljs-params">name</span>):</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_fishing_places_in_country</span><span class="hljs-params">(name)</span>:</span>
     border = get_country_border(name)
-    border_shape = geometry.shape(border[<span class="hljs-string">&#x27;geometry&#x27;</span>])
+    border_shape = geometry.shape(border[<span class="hljs-string">'geometry'</span>])
     minlon, minlat, maxlon, maxlat = border_shape.bounds
-    bbox = <span class="hljs-string">f&quot;(<span class="hljs-subst">{minlat}</span>, <span class="hljs-subst">{minlon}</span>, <span class="hljs-subst">{maxlat}</span>, <span class="hljs-subst">{maxlon}</span>)&quot;</span>
+    bbox = <span class="hljs-string">f"(<span class="hljs-subst">{minlat}</span>, <span class="hljs-subst">{minlon}</span>, <span class="hljs-subst">{maxlat}</span>, <span class="hljs-subst">{maxlon}</span>)"</span>
 
-    tags = [<span class="hljs-string">&#x27;leisure=fishing&#x27;</span>] + [<span class="hljs-string">f&quot;fishing=<span class="hljs-subst">{v}</span>&quot;</span> <span class="hljs-keyword">for</span> v <span class="hljs-keyword">in</span> [<span class="hljs-string">&#x27;yes&#x27;</span>, <span class="hljs-string">&#x27;private&#x27;</span>, <span class="hljs-string">&#x27;permissive&#x27;</span>]]
+    tags = [<span class="hljs-string">'leisure=fishing'</span>] + [<span class="hljs-string">f"fishing=<span class="hljs-subst">{v}</span>"</span> <span class="hljs-keyword">for</span> v <span class="hljs-keyword">in</span> [<span class="hljs-string">'yes'</span>, <span class="hljs-string">'private'</span>, <span class="hljs-string">'permissive'</span>]]
     queries = []
-    <span class="hljs-keyword">for</span> geom_t <span class="hljs-keyword">in</span> [<span class="hljs-string">&#x27;node&#x27;</span>, <span class="hljs-string">&#x27;way&#x27;</span>, <span class="hljs-string">&#x27;relation&#x27;</span>]:
+    <span class="hljs-keyword">for</span> geom_t <span class="hljs-keyword">in</span> [<span class="hljs-string">'node'</span>, <span class="hljs-string">'way'</span>, <span class="hljs-string">'relation'</span>]:
         <span class="hljs-keyword">for</span> tag <span class="hljs-keyword">in</span> tags:
-            queries.append(<span class="hljs-string">f&quot;<span class="hljs-subst">{geom_t}</span>[<span class="hljs-subst">{tag}</span>]<span class="hljs-subst">{bbox}</span>;&quot;</span>)
+            queries.append(<span class="hljs-string">f"<span class="hljs-subst">{geom_t}</span>[<span class="hljs-subst">{tag}</span>]<span class="hljs-subst">{bbox}</span>;"</span>)
 
-    print(<span class="hljs-string">&quot;Loading all information about fishing places from overpass...&quot;</span>)
-    data = overpass_call(<span class="hljs-string">f&quot;&quot;&quot;
+    print(<span class="hljs-string">"Loading all information about fishing places from overpass..."</span>)
+    data = overpass_call(<span class="hljs-string">f"""
         [out:json];
         (
-            <span class="hljs-subst">{<span class="hljs-string">&quot;&quot;</span>.join(queries)}</span>
+            <span class="hljs-subst">{<span class="hljs-string">""</span>.join(queries)}</span>
             &lt;;
         );
         out geom;
-    &quot;&quot;&quot;</span>)
+    """</span>)
 
     geojson_data = json2geojson(data, filter_used_refs=<span class="hljs-literal">False</span>)
-    print(<span class="hljs-string">f&quot;Find all geometries inside <span class="hljs-subst">{name}</span>&quot;</span>)
+    print(<span class="hljs-string">f"Find all geometries inside <span class="hljs-subst">{name}</span>"</span>)
     geojson_data = get_features_inside_shape(geojson_data, border_shape)
-    print(<span class="hljs-string">&quot;Count of features:&quot;</span>, <span class="hljs-built_in">len</span>(geojson_data[<span class="hljs-string">&#x27;features&#x27;</span>]))
+    print(<span class="hljs-string">"Count of features:"</span>, len(geojson_data[<span class="hljs-string">'features'</span>]))
     <span class="hljs-keyword">return</span> geojson_data
 
 
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">save_data</span>(<span class="hljs-params">data, geom_file</span>):</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">save_data</span><span class="hljs-params">(data, geom_file)</span>:</span>
     json_data = json.dumps(data, indent=<span class="hljs-number">2</span>)
-    f = codecs.<span class="hljs-built_in">open</span>(geom_file, <span class="hljs-string">&#x27;w&#x27;</span>)
+    f = codecs.open(geom_file, <span class="hljs-string">'w'</span>)
     f.write(json_data)
     f.close()
-    print(<span class="hljs-string">&quot;Data saved to&quot;</span>, geom_file)
+    print(<span class="hljs-string">"Data saved to"</span>, geom_file)
 
 
-data = get_fishing_places_in_country(<span class="hljs-string">&quot;Ukraine&quot;</span>)
-save_data(data, <span class="hljs-string">&#x27;fishing_places_ukraine.geojson&#x27;</span>)</code></pre>
+data = get_fishing_places_in_country(<span class="hljs-string">"Ukraine"</span>)
+save_data(data, <span class="hljs-string">'fishing_places_ukraine.geojson'</span>)</code></pre>
 <p>In this code you can notice some optimizations inside <code>get_features_inside_shape</code>. We need this to perform geospatial queries (like intersection) faster. Here used <code>katana</code> method to split large geometries into parts, you can find more information in this article <a href="https://snorfalorpagus.net/blog/2016/03/13/splitting-large-polygons-for-faster-intersections/" target="_blank" rel="noopener noreferrer" >Splitting large polygons for faster intersections</a>. Other optimization is R-tree packed using the Sort-Tile-Recursive algorithm (<a href="https://shapely.readthedocs.io/en/stable/manual.html#str-packed-r-tree" target="_blank" rel="noopener noreferrer" >documentation about STRtree in shapely</a>).</p>
 <p>Visualisation of generated dataset:</p>
 <iframe title="Інтерактивна карта зі згладженими класифікованими зонами" class="lazyload" data-src="https://aspectum.com/app/maps/embed/fb73004f-8ba0-44e4-b2ff-8021b7dfe92c" width="960" height="600" frameborder="0" style="border: 0"></iframe>
