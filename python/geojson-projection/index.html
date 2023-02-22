@@ -2,17 +2,17 @@
 <p>Structure of geojson file is quite simple. To work with geojson we can use standart module in python called <code>json</code>. Often geojson files contains utf-8 symbols, so <code>codecs</code> module will be helpfull. And main module that we need for projections is <code>pyproj</code> (follow <a href="https://pyproj4.github.io/pyproj/stable/installation.html" target="_blank" rel="noopener noreferrer" >installation guide</a> or simply run command below).</p>
 <pre><code data-lang="sh" class="hljs">pip install pyproj</code></pre>
 <p>Pyproj provides APIs to convert pair of coordinates. Projection of single point will look like:</p>
-<pre><code data-lang="python" class="hljs">polar = pyproj.Proj(init=<span class="hljs-string">'epsg:4326'</span>)
-mercator = pyproj.Proj(init=<span class="hljs-string">'epsg:3857'</span>)
+<pre><code data-lang="python" class="hljs">polar = pyproj.Proj(init=<span class="hljs-string">&#x27;epsg:4326&#x27;</span>)
+mercator = pyproj.Proj(init=<span class="hljs-string">&#x27;epsg:3857&#x27;</span>)
 
 [x, y] = [<span class="hljs-number">26.2513165</span>, <span class="hljs-number">50.6196175</span>]
 new_x, new_y = pyproj.transform(polar, mercator, x, y)</code></pre>
 <p>All we need to convert any geomentry in geojson is simple recursive function:</p>
-<pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">project_coords</span><span class="hljs-params">(coords, from_proj, to_proj)</span>:</span>
-    <span class="hljs-keyword">if</span> len(coords) &lt; <span class="hljs-number">1</span>:
+<pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">project_coords</span>(<span class="hljs-params">coords, from_proj, to_proj</span>):</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(coords) &lt; <span class="hljs-number">1</span>:
         <span class="hljs-keyword">return</span> []
 
-    <span class="hljs-keyword">if</span> isinstance(coords[<span class="hljs-number">0</span>], numbers.Number):
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">isinstance</span>(coords[<span class="hljs-number">0</span>], numbers.Number):
         from_x, from_y = coords
         to_x, to_y = pyproj.transform(from_proj, to_proj, from_x, from_y)
         <span class="hljs-keyword">return</span> [to_x, to_y]
@@ -29,15 +29,15 @@ new_x, new_y = pyproj.transform(polar, mercator, x, y)</code></pre>
 <span class="hljs-keyword">import</span> numbers
 
 <span class="hljs-comment"># Define projections</span>
-polar = pyproj.Proj(init=<span class="hljs-string">'epsg:4326'</span>)
-mercator = pyproj.Proj(init=<span class="hljs-string">'epsg:3857'</span>)
+polar = pyproj.Proj(init=<span class="hljs-string">&#x27;epsg:4326&#x27;</span>)
+mercator = pyproj.Proj(init=<span class="hljs-string">&#x27;epsg:3857&#x27;</span>)
 
 
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">project_coords</span><span class="hljs-params">(coords, from_proj, to_proj)</span>:</span>
-    <span class="hljs-keyword">if</span> len(coords) &lt; <span class="hljs-number">1</span>:
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">project_coords</span>(<span class="hljs-params">coords, from_proj, to_proj</span>):</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(coords) &lt; <span class="hljs-number">1</span>:
         <span class="hljs-keyword">return</span> []
 
-    <span class="hljs-keyword">if</span> isinstance(coords[<span class="hljs-number">0</span>], numbers.Number):
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">isinstance</span>(coords[<span class="hljs-number">0</span>], numbers.Number):
         from_x, from_y = coords
         to_x, to_y = pyproj.transform(from_proj, to_proj, from_x, from_y)
         <span class="hljs-keyword">return</span> [to_x, to_y]
@@ -48,57 +48,57 @@ mercator = pyproj.Proj(init=<span class="hljs-string">'epsg:3857'</span>)
     <span class="hljs-keyword">return</span> new_coords
 
 
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">project_feature</span><span class="hljs-params">(feature, from_proj, to_proj)</span>:</span>
-    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-string">'geometry'</span> <span class="hljs-keyword">in</span> feature <span class="hljs-keyword">or</span> <span class="hljs-keyword">not</span> <span class="hljs-string">'coordinates'</span> <span class="hljs-keyword">in</span> feature[<span class="hljs-string">'geometry'</span>]:
-        print(<span class="hljs-string">'Failed project feature'</span>, feature)
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">project_feature</span>(<span class="hljs-params">feature, from_proj, to_proj</span>):</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-string">&#x27;geometry&#x27;</span> <span class="hljs-keyword">in</span> feature <span class="hljs-keyword">or</span> <span class="hljs-keyword">not</span> <span class="hljs-string">&#x27;coordinates&#x27;</span> <span class="hljs-keyword">in</span> feature[<span class="hljs-string">&#x27;geometry&#x27;</span>]:
+        print(<span class="hljs-string">&#x27;Failed project feature&#x27;</span>, feature)
         <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
 
-    new_coordinates = project_coords(feature[<span class="hljs-string">'geometry'</span>][<span class="hljs-string">'coordinates'</span>], from_proj, to_proj)
-    feature[<span class="hljs-string">'geometry'</span>][<span class="hljs-string">'coordinates'</span>] = new_coordinates
+    new_coordinates = project_coords(feature[<span class="hljs-string">&#x27;geometry&#x27;</span>][<span class="hljs-string">&#x27;coordinates&#x27;</span>], from_proj, to_proj)
+    feature[<span class="hljs-string">&#x27;geometry&#x27;</span>][<span class="hljs-string">&#x27;coordinates&#x27;</span>] = new_coordinates
     <span class="hljs-keyword">return</span> feature
 
 
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">read_data</span><span class="hljs-params">(geom_file)</span>:</span>
-    <span class="hljs-keyword">with</span> open(geom_file, encoding=<span class="hljs-string">'utf-8'</span>) <span class="hljs-keyword">as</span> data:
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">read_data</span>(<span class="hljs-params">geom_file</span>):</span>
+    <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(geom_file, encoding=<span class="hljs-string">&#x27;utf-8&#x27;</span>) <span class="hljs-keyword">as</span> data:
         data = json.load(data)
     <span class="hljs-keyword">return</span> data
 
 
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">save_data</span><span class="hljs-params">(data, geom_file)</span>:</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">save_data</span>(<span class="hljs-params">data, geom_file</span>):</span>
     json_data = json.dumps(data, indent=<span class="hljs-number">2</span>)
-    f = codecs.open(geom_file, <span class="hljs-string">"w"</span>)
+    f = codecs.<span class="hljs-built_in">open</span>(geom_file, <span class="hljs-string">&quot;w&quot;</span>)
     f.write(json_data)
     f.close()
 
 
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">project_geojson_file</span><span class="hljs-params">(in_file, out_file, from_proj, to_proj)</span>:</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">project_geojson_file</span>(<span class="hljs-params">in_file, out_file, from_proj, to_proj</span>):</span>
     data = read_data(in_file)
 
     projected_features = []
-    <span class="hljs-keyword">for</span> feature <span class="hljs-keyword">in</span> data[<span class="hljs-string">'features'</span>]:
+    <span class="hljs-keyword">for</span> feature <span class="hljs-keyword">in</span> data[<span class="hljs-string">&#x27;features&#x27;</span>]:
         projected_features.append(project_feature(feature, from_proj, to_proj))
-    data[<span class="hljs-string">'features'</span>] = projected_features
+    data[<span class="hljs-string">&#x27;features&#x27;</span>] = projected_features
 
     save_data(data, out_file)
 
 
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">project_file_to_polar</span><span class="hljs-params">(in_file, out_file)</span>:</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">project_file_to_polar</span>(<span class="hljs-params">in_file, out_file</span>):</span>
     project_geojson_file(in_file, out_file, from_proj=mercator, to_proj=polar)
 
 
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">project_file_to_mercator</span><span class="hljs-params">(in_file, out_file)</span>:</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">project_file_to_mercator</span>(<span class="hljs-params">in_file, out_file</span>):</span>
     project_geojson_file(in_file, out_file, from_proj=polar, to_proj=mercator)
 
 
 <span class="hljs-comment"># Project geojson file from mercator to polar</span>
-project_file_to_polar(<span class="hljs-string">'example-mercator.geojson'</span>, <span class="hljs-string">'example-polar.geojson'</span>)
+project_file_to_polar(<span class="hljs-string">&#x27;example-mercator.geojson&#x27;</span>, <span class="hljs-string">&#x27;example-polar.geojson&#x27;</span>)
 
 <span class="hljs-comment"># And from polar to mercator</span>
-project_file_to_mercator(<span class="hljs-string">'example-polar.geojson'</span>, <span class="hljs-string">'example-mercator.geojson'</span>)
+project_file_to_mercator(<span class="hljs-string">&#x27;example-polar.geojson&#x27;</span>, <span class="hljs-string">&#x27;example-mercator.geojson&#x27;</span>)
 
 <span class="hljs-comment"># Or any other projection you want</span>
-project_geojson_file(<span class="hljs-string">'example-epsg-6069.geojson'</span>, <span class="hljs-string">'example-polar.geojson'</span>,
-                     from_proj=pyproj.Proj(init=<span class="hljs-string">'epsg:6069'</span>), to_proj=polar)</code></pre>
+project_geojson_file(<span class="hljs-string">&#x27;example-epsg-6069.geojson&#x27;</span>, <span class="hljs-string">&#x27;example-polar.geojson&#x27;</span>,
+                     from_proj=pyproj.Proj(init=<span class="hljs-string">&#x27;epsg:6069&#x27;</span>), to_proj=polar)</code></pre>
 <p><em>* All code in this article provided under MIT license</em></p>
 <p class="thank-you-for-attention 😉">Thank you for attention!</p></main></div><footer>© Mikola Parfenyuck<div class="social-links"><a class="icon icon-twitter" rel="noopener" target="_blank" aria-label="My twitter" title="My twitter" href="https://twitter.com/i_rapkin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72"><path d="M67.812 16.141a26.246 26.246 0 0 1-7.519 2.06 13.134 13.134 0 0 0 5.756-7.244 26.127 26.127 0 0 1-8.313 3.176A13.075 13.075 0 0 0 48.182 10c-7.229 0-13.092 5.861-13.092 13.093 0 1.026.118 2.021.338 2.981-10.885-.548-20.528-5.757-26.987-13.679a13.048 13.048 0 0 0-1.771 6.581c0 4.542 2.312 8.551 5.824 10.898a13.048 13.048 0 0 1-5.93-1.638c-.002.055-.002.11-.002.162 0 6.345 4.513 11.638 10.504 12.84a13.177 13.177 0 0 1-3.449.457c-.846 0-1.667-.078-2.465-.231 1.667 5.2 6.499 8.986 12.23 9.09a26.276 26.276 0 0 1-16.26 5.606A26.21 26.21 0 0 1 4 55.976a37.036 37.036 0 0 0 20.067 5.882c24.083 0 37.251-19.949 37.251-37.249 0-.566-.014-1.134-.039-1.694a26.597 26.597 0 0 0 6.533-6.774z"></path></svg>
 </a><a class="icon icon-github" rel="noopener" target="_blank" aria-label="My github" title="My github" href="https://github.com/rapkin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg>
