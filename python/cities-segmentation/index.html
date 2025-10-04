@@ -79,7 +79,8 @@
   <span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> data[<span class="hljs-string">&#x27;features&#x27;</span>]:
     <span class="hljs-keyword">if</span> f[<span class="hljs-string">&#x27;properties&#x27;</span>][<span class="hljs-string">&#x27;tags&#x27;</span>][<span class="hljs-string">&#x27;type&#x27;</span>] == <span class="hljs-string">&#x27;boundary&#x27;</span>:
       <span class="hljs-keyword">return</span> f
-  <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span></code></pre>
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+</code></pre>
 <p>Для отримання набору доріг запит уже складніший:</p>
 <pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_roads</span>(<span class="hljs-params">minlat, minlon, maxlat, maxlon</span>):</span>
   bb = <span class="hljs-string">f&quot;(<span class="hljs-subst">{minlat}</span>, <span class="hljs-subst">{minlon}</span>, <span class="hljs-subst">{maxlat}</span>, <span class="hljs-subst">{maxlon}</span>)&quot;</span>
@@ -90,10 +91,12 @@
     way[highway~&quot;^motorway$|^trunk$|^primary$|^secondary$|^tertiary$|^residential$&quot;]{bb};
     out geom;
   &quot;&quot;&quot;)
-  return xml2geojson(data)[&#39;features&#39;]</code>quot;]<span class="hljs-subst">{bb}</span>;
+  return xml2geojson(data)[&#39;features&#39;]
+</code>quot;]<span class="hljs-subst">{bb}</span>;
     out geom;
   &quot;&quot;&quot;</span>)
-  <span class="hljs-keyword">return</span> xml2geojson(data)[<span class="hljs-string">&#x27;features&#x27;</span>]</code></pre>
+  <span class="hljs-keyword">return</span> xml2geojson(data)[<span class="hljs-string">&#x27;features&#x27;</span>]
+</code></pre>
 <p>Водні об’єкти я завантажую досить великим запитом, адже там зустрічається як лінійна геометрія так і полігональна.</p>
 <pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_water_zones</span>(<span class="hljs-params">minlat, minlon, maxlat, maxlon</span>):</span>
   bb = <span class="hljs-string">f&quot;(<span class="hljs-subst">{minlat}</span>, <span class="hljs-subst">{minlon}</span>, <span class="hljs-subst">{maxlat}</span>, <span class="hljs-subst">{maxlon}</span>)&quot;</span>
@@ -115,7 +118,8 @@
     );
     out geom;
   &quot;&quot;&quot;)
-  return xml2geojson(data)[&#39;features&#39;]</code>quot;]<span class="hljs-subst">{bb}</span>;
+  return xml2geojson(data)[&#39;features&#39;]
+</code>quot;]<span class="hljs-subst">{bb}</span>;
       way[landuse=basin]<span class="hljs-subst">{bb}</span>;
       way[natural=water]<span class="hljs-subst">{bb}</span>;
       way[water]<span class="hljs-subst">{bb}</span>;
@@ -127,11 +131,12 @@
     );
     out geom;
   &quot;&quot;&quot;</span>)
-  <span class="hljs-keyword">return</span> xml2geojson(data)[<span class="hljs-string">&#x27;features&#x27;</span>]</code></pre>
+  <span class="hljs-keyword">return</span> xml2geojson(data)[<span class="hljs-string">&#x27;features&#x27;</span>]
+</code></pre>
 <p>Інформацію про берегову лінію можна завантажити вручну (адже це один датасет для всієї планети), але корисно мати для цього код, який завантажує та кешує цей датасет, адже він може змінюватись.
 Після завантаження датасету, його потрібно розархівувати та отримати геометрію:</p>
 <pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_coastline</span>():</span>
-  print(<span class="hljs-string">&#x27;Loading coastline to memory ...&#x27;</span>)
+  <span class="hljs-built_in">print</span>(<span class="hljs-string">&#x27;Loading coastline to memory ...&#x27;</span>)
   coastline_zip = get_coastline_file() <span class="hljs-comment"># returns abs path to zip file with dataset</span>
   coastline_dir = coastline_zip.replace(<span class="hljs-string">&#x27;.zip&#x27;</span>, <span class="hljs-string">&#x27;&#x27;</span>)
   coastline_file = os.path.join(coastline_dir, <span class="hljs-string">&#x27;land_polygons.shp&#x27;</span>)
@@ -142,8 +147,9 @@
     r.close()
 
   data = geopandas.read_file(coastline_file)
-  print(<span class="hljs-string">&#x27;Coastline loaded!&#x27;</span>)
-  <span class="hljs-keyword">return</span> data</code></pre>
+  <span class="hljs-built_in">print</span>(<span class="hljs-string">&#x27;Coastline loaded!&#x27;</span>)
+  <span class="hljs-keyword">return</span> data
+</code></pre>
 <h2 id="формування-початкової-геометрії">Формування початкової геометрії</h2>
 <p>Як було сказано раніше, робота з лінійною та полігональною геометріями відрізняється — адже полігони займають певну площу, а от для лінійної геометрію цю площу потрібно якось побудувати — перетворити лінію на полігон певного розміру, який би відповідав розмірам реального об’єкту.
 Аби зробити це перетворення можна використати операцію буферизації — грубо кажучи це розширення лінії.
@@ -157,7 +163,8 @@
   <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> lines:
     b = line.buffer(b_size, cap_style=<span class="hljs-number">3</span>, join_style=<span class="hljs-number">2</span>, mitre_limit=<span class="hljs-number">1</span>)
     buffers.append(b)
-  <span class="hljs-keyword">return</span> array_to_multipolygon(buffers)</code></pre>
+  <span class="hljs-keyword">return</span> array_to_multipolygon(buffers)
+</code></pre>
 <p>Приклад перетворення geojson в геометрію shapely найкраще проілюстровано в формуванні зон водної території:</p>
 <pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">convert_water_features_to_zones</span>(<span class="hljs-params">geoms</span>):</span>
   water_zones = []
@@ -171,7 +178,8 @@
 
   rivers = build_buffer_on_lines(lines, buffer_sizes[<span class="hljs-string">&#x27;river&#x27;</span>])
   water_zones.append(rivers)
-  <span class="hljs-keyword">return</span> ops.cascaded_union(water_zones)</code></pre>
+  <span class="hljs-keyword">return</span> ops.cascaded_union(water_zones)
+</code></pre>
 <p>На жаль, процес класифікації геометрії OSM не вдасться повністю помістити в цю статтю (насправді це можна виділити в окрему величезну статтю), але в кількох словах завантаження всієї геометрії з OSM та розбиття за певними правилами на цільовий набір класів.</p>
 <pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_all_geometry</span>(<span class="hljs-params">minlat, minlon, maxlat, maxlon</span>):</span>
   query = <span class="hljs-string">f&quot;(node(<span class="hljs-subst">{minlat}</span>, <span class="hljs-subst">{minlon}</span>, <span class="hljs-subst">{maxlat}</span>, <span class="hljs-subst">{maxlon}</span>);&lt;;); out geom;&quot;</span><span class="hljs-string">&quot;&quot;</span>
@@ -185,7 +193,8 @@
       <span class="hljs-keyword">continue</span>
     item[<span class="hljs-string">&#x27;properties&#x27;</span>][<span class="hljs-string">&#x27;class&#x27;</span>] = cls
     features.append(item)
-  <span class="hljs-keyword">return</span> features</code></pre>
+  <span class="hljs-keyword">return</span> features
+</code></pre>
 <p>В результаті цих операцій ми отримуємо початкові набори геометрії (на прикладі міста Київ):</p>
 <ul>
 <li>межа міста (border)</li>
@@ -248,7 +257,8 @@
       zone = zone.difference(p)
       parts.append(zone)
 
-  <span class="hljs-keyword">return</span> array_to_multipolygon(parts)</code></pre>
+  <span class="hljs-keyword">return</span> array_to_multipolygon(parts)
+</code></pre>
 <p>Після цього можна безпосередньо переходити до логіки алгоритму:</p>
 <pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">compute_simple_zones</span>(<span class="hljs-params">border, roads, railways, water_zones</span>):</span>
   roads_in_city = optimized_intersection(roads, border)
@@ -269,7 +279,8 @@
   features += multipolygon_to_features(railways_without_roads, <span class="hljs-string">&#x27;railways&#x27;</span>)
   features += multipolygon_to_features(city_zones)
 
-  <span class="hljs-keyword">return</span> features</code></pre>
+  <span class="hljs-keyword">return</span> features
+</code></pre>
 <p>В результаті ми отримали набір полігонів (в GeoJSON).
 Але кінцева ціль — отримати класифіковані зони міста, тому полігони які ще не мають класу потрібно якось класифікувати (зони доріг, залізниці та водних об’єктів ми вже отримали на попередніх етапах).</p>
 <p>Для прикладу можна прокласифікувати ці зони порахувавши площу пересічення з іншими полігонами OSM (які до цього були автоматично розмічені за цільовим набором класів).</p>
@@ -284,10 +295,10 @@
 
       shape = geometry.shape(feature[<span class="hljs-string">&#x27;geometry&#x27;</span>])
       <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> shape.is_valid:
-        print(<span class="hljs-string">&#x27;Shape is invalid! Try to fix&#x27;</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&#x27;Shape is invalid! Try to fix&#x27;</span>)
         shape = polygon_fix(shape)
         <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> shape.is_valid:
-          print(<span class="hljs-string">&#x27;Not fixed :(&#x27;</span>, validation.explain_validity(shape))
+          <span class="hljs-built_in">print</span>(<span class="hljs-string">&#x27;Not fixed :(&#x27;</span>, validation.explain_validity(shape))
           <span class="hljs-keyword">continue</span>
 
       probs = {}
@@ -308,13 +319,15 @@
         <span class="hljs-string">&#x27;class&#x27;</span>: detected_class,
         <span class="hljs-string">&#x27;probabilities&#x27;</span>: normalize(probs)
       }
-  <span class="hljs-keyword">return</span> features</code></pre>
+  <span class="hljs-keyword">return</span> features
+</code></pre>
 <p>Цікавою частиною тут є функція polygon_fix, яка часто допомагає впоратись з неправильною геометрією (на жаль, я вже й не пам’ятаю де знайшов код цієї функції).</p>
 <pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">polygon_fix</span>(<span class="hljs-params">polygon</span>):</span>
   be = polygon.exterior
   mls = be.intersection(be)
   polygons = ops.polygonize(mls)
-  <span class="hljs-keyword">return</span> geometry.MultiPolygon(polygons)</code></pre>
+  <span class="hljs-keyword">return</span> geometry.MultiPolygon(polygons)
+</code></pre>
 <p>На цьому основна частина алгоритму закінчується, а класифіковану геометрію можна зберегти в файл аби десь візуалізувати.</p>
 <p>Візуалізація для міста Київ з використанням QGIS</p>
 <p><div class="lazyload" style="padding-bottom: 94.90695396669932%" data-bg="url(/assets/optimized-img/kiev-simple.png)" title="Класифіковані зони міста Київ"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/kiev-simple.png"></a></div></p>
@@ -328,7 +341,8 @@
 <p>Код який це робить</p>
 <pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">merge_roads</span>(<span class="hljs-params">polygon</span>):</span>
   area = polygon.buffer(merge_buffer_size, cap_style=<span class="hljs-number">2</span>, join_style=<span class="hljs-number">2</span>, mitre_limit=<span class="hljs-number">1</span>)
-  <span class="hljs-keyword">return</span> area.buffer(-merge_buffer_size, cap_style=<span class="hljs-number">2</span>, join_style=<span class="hljs-number">2</span>, mitre_limit=<span class="hljs-number">1</span>)</code></pre>
+  <span class="hljs-keyword">return</span> area.buffer(-merge_buffer_size, cap_style=<span class="hljs-number">2</span>, join_style=<span class="hljs-number">2</span>, mitre_limit=<span class="hljs-number">1</span>)
+</code></pre>
 <p>Різницю в геометрії, що генерується, можна побачити на зображенні.</p>
 <p><div class="lazyload" style="padding-bottom: 47.45347698334966%" data-bg="url(/assets/optimized-img/kiev-compare-geom.png)" title="Порівняння простої геометрії та після об&#39;єднання"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/kiev-compare-geom.png"></a></div></p>
 <p>А повне зображення для міста Київ:</p>
@@ -364,7 +378,8 @@
   features += multipolygon_to_features(water_zones_in_city, <span class="hljs-string">&#x27;water&#x27;</span>)
   features += multipolygon_to_features(smooth_city_zones)
 
-  <span class="hljs-keyword">return</span> features</code></pre>
+  <span class="hljs-keyword">return</span> features
+</code></pre>
 <p>Як помітно з коду, появилась нова функція — make_smooth_zones.
 Саме вона і займається побудовою буферів і виправленням згенерованої геометрії (інколи зони накладаються одна на одну і потрібно робити додаткове віднімання між полігонами зон аби утворити правильний мультиполігон)</p>
 <pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">make_smooth_zones</span>(<span class="hljs-params">city_zones</span>):</span>
@@ -387,7 +402,8 @@
         <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> z <span class="hljs-keyword">is</span> zone <span class="hljs-keyword">and</span> zone.intersection(z).area &gt; <span class="hljs-number">0</span>:
           zones_polygons[idx] = zone.difference(z.buffer(<span class="hljs-number">0.000001</span>, cap_style=<span class="hljs-number">2</span>, join_style=<span class="hljs-number">2</span>, mitre_limit=<span class="hljs-number">1</span>))
 
-  <span class="hljs-keyword">return</span> geometry.MultiPolygon(zones_polygons)</code></pre>
+  <span class="hljs-keyword">return</span> geometry.MultiPolygon(zones_polygons)
+</code></pre>
 <p>Результат згладжування</p>
 <p><div class="lazyload" style="padding-bottom: 94.90695396669932%" data-bg="url(/assets/optimized-img/kiev.png)" title="Згладжені зони міста Київ"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/kiev.png"></a></div></p>
 <p>Роздивитись можна тут:</p>
