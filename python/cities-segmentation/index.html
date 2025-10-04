@@ -4,7 +4,7 @@
 Надалі можна використати ці дані для навчання нейронних мереж, що буде автоматично класифікувати територію на основі нових знімків, або ж знімків територій, що мають недостатнє охоплення векторними даними.
 (В цьому блозі вже робився огляд підходу по класифікації територій).</p>
 <h2 id="що-нам-потрібно-для-цього">Що нам потрібно для цього?</h2>
-<p>Якщо коротко то Python (Cython), Shapely, OSM/Overpass та Aspectum щоб робити візуалізацію.
+<p>Якщо коротко то Python (Cython), Shapely, OSM/Overpass та QGIS щоб робити візуалізацію.
 А тепер по кожному пункту:</p>
 <ul>
 <li><p><strong>Python</strong> — насправді можна спробувати і іншою мовою зробити аналогічне (наприклад використавши JavaScript та Turf.js), та в деяких місцях на Python є можливість щось оптимізувати без особливих зусиль. Наприклад, використати Cython для компіляції коду написаного на python в нативне розширення.</p>
@@ -21,7 +21,7 @@
 </li>
 <li><p><strong>Land polygons</strong> — датасет берегової лінії <a href="https://osmdata.openstreetmap.de/data/land-polygons.html" target="_blank" rel="noopener noreferrer" >osmdata/land-polygons</a></p>
 </li>
-<li><p><strong>Aspectum</strong> — сервіс для візуалізації та аналізу картографічної інформації. Можна скористатись і geojson.io, але при великій кількості геометрію можуть виникати проблеми з продуктивністю. Часто можна замінити інтерфейсом QGIS. Сторінка сервісу <a href="https://aspectum.com" target="_blank" rel="noopener noreferrer" >aspectum.com</a></p>
+<li><p><strong>QGIS</strong> — програма для візуалізації та аналізу картографічної інформації. Можна також скористатись geojson.io для перегляду результатів</p>
 </li>
 </ul>
 <h2 id="що-конкретно-ми-хочемо-отримати">Що конкретно ми хочемо отримати?</h2>
@@ -329,11 +329,8 @@
   <span class="hljs-keyword">return</span> geometry.MultiPolygon(polygons)
 </code></pre>
 <p>На цьому основна частина алгоритму закінчується, а класифіковану геометрію можна зберегти в файл аби десь візуалізувати.</p>
-<p>Візуалізація для міста Київ з використанням QGIS</p>
+<p>Візуалізація для міста Київ з використанням QGIS:</p>
 <p><div class="lazyload" style="padding-bottom: 94.90695396669932%" data-bg="url(/assets/optimized-img/kiev-simple.png)" title="Класифіковані зони міста Київ"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/kiev-simple.png"></a></div></p>
-<p>Роздивитись згенеровану геометрію можна використавши веб-платформу Aspectum:</p>
-<iframe title="Інтерактивна карта з класифікованими зонами" class="lazyload" data-src="https://aspectum.com/app/maps/embed/dbcc98bb-6bd2-49ee-92d0-26d03297a33b" width="960" height="600" frameborder="0" style="border: 0"></iframe>
-
 <h2 id="алгоритм-з-обєднанням-доріг">Алгоритм з об’єднанням доріг</h2>
 <p>Цей алгоритм майже не відрізняється від попереднього, відмінний лише етап утворення мультиполігонів доріг (звичайних та залізничних).
 Аби цього досягнути потрібно замість звичайної побудови буферів робити буфер більшого розміру, а потім операцією віднімання буферу отримувати полігони потрібного розміру, при цьому дороги які були поряд стануть об’єднаними.</p>
@@ -347,9 +344,6 @@
 <p><div class="lazyload" style="padding-bottom: 47.45347698334966%" data-bg="url(/assets/optimized-img/kiev-compare-geom.png)" title="Порівняння простої геометрії та після об&#39;єднання"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/kiev-compare-geom.png"></a></div></p>
 <p>А повне зображення для міста Київ:</p>
 <p><div class="lazyload" style="padding-bottom: 94.90695396669932%" data-bg="url(/assets/optimized-img/kiev-merged.png)" title="Зони міста Київ з об&#39;єднаними дорогами"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/kiev-merged.png"></a></div></p>
-<p>Переглянути для всіх міст можна тут:</p>
-<iframe  title="Інтерактивна карта з класифікованими зонами та об'єднаними дорогами" class="lazyload" data-src="https://aspectum.com/app/maps/embed/2351cf7d-e975-4a5d-b10a-b6c2776474da" width="960" height="600" frameborder="0" style="border: 0"></iframe>
-
 <h2 id="алгоритм-зі-згладжуванням-зон">Алгоритм зі згладжуванням зон</h2>
 <p>Деколи високе “засмічення” карти дорогами є небажаним результатом (наприклад візуально це погано сприймається).
 Для цього знову можна використати операцію з додаванням та відніманням буферу — для кожної зони ми спершу додаємо буфер, а потім віднімаємо.
@@ -404,11 +398,8 @@
 
   <span class="hljs-keyword">return</span> geometry.MultiPolygon(zones_polygons)
 </code></pre>
-<p>Результат згладжування</p>
+<p>Результат згладжування:</p>
 <p><div class="lazyload" style="padding-bottom: 94.90695396669932%" data-bg="url(/assets/optimized-img/kiev.png)" title="Згладжені зони міста Київ"><a data-no-swup target="_blank" class="download-link" title="Open full image" href="/assets/img/kiev.png"></a></div></p>
-<p>Роздивитись можна тут:</p>
-<iframe title="Інтерактивна карта зі згладженими класифікованими зонами" class="lazyload" data-src="https://aspectum.com/app/maps/embed/10da881d-136c-4c53-b83c-b22815a09ba7" width="960" height="600" frameborder="0" style="border: 0"></iframe>
-
 <h2 id="оптимізація-виконання-алгоритму">Оптимізація виконання алгоритму</h2>
 <p>Оскільки цей алгоритм виконує розмітку для міста, то логічно буде спробувати запустити його на декількох містах.
 А в тому щоб робити це синхронно нема ніякої необхідності — найпростіше буде просто запустити виконання для кожного міста в окремому потоці.</p>
