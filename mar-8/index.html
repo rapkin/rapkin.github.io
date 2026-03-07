@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>8 березня 💌</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="locked">
+
+  <!-- ═══════════════════════════════════════ SAFE SCREEN ══ -->
+  <section id="safe-screen">
+<div class="safe-wrapper">
+      <!-- Safe body (always behind) -->
+      <div class="safe-body">
+        <div class="safe-inside">
+          <div class="safe-inside-glow"></div>
+          <p class="safe-inside-text" id="safe-inside-text"></p>
+        </div>
+      </div>
+
+      <!-- Door (3-D rotating) -->
+      <div class="safe-3d-wrap">
+        <div class="safe-door" id="safe-door">
+
+          <!-- FRONT FACE -->
+          <div class="safe-face">
+            <!-- Corner bolts -->
+            <div class="bolt bolt-tl" id="bolt-tl"></div>
+            <div class="bolt bolt-tr" id="bolt-tr"></div>
+            <div class="bolt bolt-bl" id="bolt-bl"></div>
+            <div class="bolt bolt-br" id="bolt-br"></div>
+
+            <!-- Display -->
+            <div class="safe-display">
+              <div class="display-inner">
+                <div class="code-dots" id="code-dots">
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                </div>
+                <div class="display-label">ти знаєш код</div>
+              </div>
+            </div>
+
+            <!-- Handle wheel -->
+            <div class="safe-handle-wrap">
+              <div class="safe-handle" id="safe-handle">
+                <div class="handle-ring"></div>
+                <div class="handle-spoke h-spoke"></div>
+                <div class="handle-spoke v-spoke"></div>
+                <div class="handle-center"></div>
+              </div>
+            </div>
+
+            <!-- Keypad -->
+            <div class="safe-keypad">
+              <div class="keypad-grid">
+                <button class="key" data-digit="1">1</button>
+                <button class="key" data-digit="2">2</button>
+                <button class="key" data-digit="3">3</button>
+                <button class="key" data-digit="4">4</button>
+                <button class="key" data-digit="5">5</button>
+                <button class="key" data-digit="6">6</button>
+                <button class="key" data-digit="7">7</button>
+                <button class="key" data-digit="8">8</button>
+                <button class="key" data-digit="9">9</button>
+                <button class="key key-clear" id="key-clear">&#x232B;</button>
+                <button class="key" data-digit="0">0</button>
+                <div class="key-empty"></div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- BACK FACE (visible when door swings open) -->
+          <div class="safe-back"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ UNLOCK OVERLAY ══ -->
+  <div class="unlock-overlay" id="unlock-overlay">
+    <div class="unlock-message" id="unlock-message"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ MAIN CONTENT ══ -->
+  <main id="main-content">
+
+    <!-- ── S1: LETTER ── -->
+    <section class="section s-letter" id="s-letter">
+      <div class="section-inner">
+        <span class="deco-symbol reveal-fade" aria-hidden="true">✦</span>
+        <p class="eyebrow reveal-up">8 березня</p>
+        <h1 class="letter-name reveal-up">Юля</h1>
+        <div class="letter-body">
+          <p class="reveal-up delay-1">Є люди, яких зустрічаєш випадково — і відразу розумієш, що це зовсім не випадково.</p>
+          <p class="reveal-up delay-2">Ти з'явилась у найнесподіваніший момент мого життя, коли все розсипалось на шматки. І саме тоді я відчув, що буває щось справжнє — тепле, спокійне, своє.</p>
+          <p class="reveal-up delay-3">Тедді, до речі, ще давно підозрював, що в мене з'явиться новий привід посміхатись. Він зазвичай правий.</p>
+          <p class="letter-sign reveal-up delay-4">&#x2014;&thinsp;з теплом, Коля&thinsp;&#x2764;&#xfe0e;</p>
+        </div>
+        <span class="deco-flower reveal-fade" aria-hidden="true">&#x2740;</span>
+      </div>
+      <div class="section-grain"></div>
+    </section>
+
+    <!-- ── S2: PHOTOS ── -->
+    <section class="section s-photos" id="s-photos">
+      <div class="section-inner">
+        <p class="eyebrow reveal-up">спогади</p>
+        <h2 class="section-title reveal-up">Моменти у кадрі</h2>
+        <div class="polaroid-row">
+          <div class="polaroid reveal-polaroid" style="--rot:-5deg; --delay:0s">
+            <div class="polaroid-img">
+              <img src="assets/1.png" alt="">
+            </div>
+            <p class="polaroid-caption">той концерт</p>
+          </div>
+          <div class="polaroid reveal-polaroid" style="--rot:3deg; --delay:0.12s">
+            <div class="polaroid-img">
+              <img src="assets/2.jpg" alt="">
+            </div>
+            <p class="polaroid-caption">певко</p>
+          </div>
+          <div class="polaroid reveal-polaroid" style="--rot:-2deg; --delay:0.24s">
+            <div class="polaroid-img">
+              <img src="assets/3.jpg" alt="">
+            </div>
+            <p class="polaroid-caption">тихий вечір</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── S3: COMPLIMENTS ── -->
+    <section class="section s-compliments" id="s-compliments">
+      <div class="section-inner">
+        <p class="eyebrow reveal-up">про тебе</p>
+        <h2 class="section-title reveal-up">Те, що мене зачаровує</h2>
+        <div class="glass-grid">
+          <div class="glass-card reveal-scale" style="--accent:#d4738a; --card-delay:0s">
+            <div class="glass-icon">&#x1F3A8;</div>
+            <h3>Дизайнерка</h3>
+            <p>Ти перетворюєш пікселі на магію. Це видно в кожній деталі, яку ти робиш.</p>
+          </div>
+          <div class="glass-card reveal-scale" style="--accent:#e8a87c; --card-delay:0.1s">
+            <div class="glass-icon">&#x2728;</div>
+            <h3>Очі</h3>
+            <p>Карі, теплі — в них можна загубитись і зовсім не шукати виходу.</p>
+          </div>
+          <div class="glass-card reveal-scale" style="--accent:#b8a9c9; --card-delay:0.2s">
+            <div class="glass-icon">&#x1F54A;&#xFE0F;</div>
+            <h3>Спокій</h3>
+            <p>З тобою тихо і добре. Це дивовижна рідкість, яку я дуже ціную.</p>
+          </div>
+          <div class="glass-card reveal-scale" style="--accent:#8fbc8f; --card-delay:0.3s">
+            <div class="glass-icon">&#x2615;</div>
+            <h3>Разом</h3>
+            <p>З тобою навіть просто мовчати &#x2014; вже подія. А не мовчати &#x2014; ще краще.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── S4: BETTY & TEDDY ── -->
+    <section class="section s-pets" id="s-pets">
+      <div class="section-inner">
+        <p class="eyebrow reveal-up">найважливіші</p>
+        <h2 class="section-title reveal-up">Бетті &amp; Тедді</h2>
+        <p class="section-subtitle reveal-up">Головні переговорники у наших справах</p>
+        <div class="pets-row">
+
+          <div class="pet-card reveal-left">
+            <div class="pet-img-wrap">
+              <img src="assets/betty.svg" alt="Бетті — біла болонка" class="pet-svg">
+            </div>
+            <h3 class="pet-name">Бетті</h3>
+            <p class="pet-desc">6 місяців &middot; біла болонка</p>
+            <p class="pet-desc2">Маленька, пухнаста, ідеальна</p>
+            <div class="pet-hearts">&#x2665; &#x2665; &#x2665;</div>
+          </div>
+
+          <div class="pet-divider reveal-fade">
+            <span>&#x1F43E;</span>
+          </div>
+
+          <div class="pet-card reveal-right">
+            <div class="pet-img-wrap">
+              <img src="assets/teddy.svg" alt="Тедді — рудий пудель" class="pet-svg">
+            </div>
+            <h3 class="pet-name">Тедді</h3>
+            <p class="pet-desc">1 рік &middot; рудий пудель</p>
+            <p class="pet-desc2">Собака-їбака, офіційно. Бетті підтверджує.</p>
+            <div class="pet-hearts">&#x2665; &#x2665; &#x2665;</div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ── S5: BORSCH ── -->
+    <section class="section s-borsch" id="s-borsch">
+      <div class="section-inner">
+        <div class="borsch-emoji reveal-up" aria-hidden="true">&#x1F372;</div>
+        <h2 class="section-title reveal-up">Борщ з п'ятьма зірками</h2>
+        <div class="stars-row reveal-up">
+          <span class="star">&#x2605;</span>
+          <span class="star">&#x2605;</span>
+          <span class="star">&#x2605;</span>
+          <span class="star">&#x2605;</span>
+          <span class="star">&#x2605;</span>
+        </div>
+        <div class="borsch-text">
+          <p class="reveal-up delay-1">Офіційно визнаю: я ніколи не їв нічого кращого.</p>
+          <p class="reveal-up delay-2">Michelin, Google Maps, Тедді — всі в захваті. Рецепт під охороною.</p>
+          <p class="borsch-quote reveal-up delay-3">&ldquo;Перша спроба — і зрозумів: це людина, яку треба тримати поруч.&rdquo;</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── S6: MOMENTS ── -->
+    <section class="section s-moments" id="s-moments">
+      <div class="section-inner">
+        <p class="eyebrow reveal-up">разом</p>
+        <h2 class="section-title reveal-up">Наші моменти</h2>
+        <div class="moments-grid">
+          <div class="moment-card reveal-up" style="--m-delay:0s">
+            <div class="moment-icon">&#x1F3B6;</div>
+            <h3>Vivienne Mort</h3>
+            <p>Той концерт. Та музика. Поруч з тобою — і все інше зникло.</p>
+          </div>
+          <div class="moment-card reveal-up" style="--m-delay:0.15s">
+            <div class="moment-icon">&#x1F37D;&#xFE0F;</div>
+            <h3>Ресторани й не тільки</h3>
+            <p>Нові місця, смачна їжа, а потім &#x2014; палке кохання. Ідеальна формула для насолодження життям та одне одним.</p>
+          </div>
+        </div>
+
+        <!-- Cozy scene illustration -->
+        <div class="cozy-scene reveal-up">
+          <div class="scene-figure">
+            <div class="scene-head scene-head-her"></div>
+            <div class="scene-body scene-body-her">
+              <div class="scene-laptop">&#x1F4BB;</div>
+            </div>
+            <div class="scene-dog">&#x1F415;</div>
+            <p class="scene-label">Юля</p>
+          </div>
+          <div class="scene-divider">&#x2741;</div>
+          <div class="scene-figure">
+            <div class="scene-head scene-head-him"></div>
+            <div class="scene-body scene-body-him">
+              <div class="scene-laptop">&#x1F5A5;&#xFE0F;</div>
+            </div>
+            <div class="scene-dog">&#x1F429;</div>
+            <p class="scene-label">Коля</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── S7: FINAL ── -->
+    <section class="section s-final" id="s-final">
+      <canvas id="confetti-canvas"></canvas>
+      <div class="section-inner final-inner">
+        <span class="final-flower reveal-fade" aria-hidden="true">&#x2740;</span>
+        <h2 class="final-title reveal-up">З 8 березня,<br>Юля&#x2665;&#xfe0e;</h2>
+        <div class="final-text">
+          <p class="reveal-up delay-1">Хай у твоєму житті буде більше тихих вечорів,<br>гарних проектів і смачного борщу.</p>
+          <p class="reveal-up delay-2">І трохи більше — нас.</p>
+        </div>
+        <p class="final-sign reveal-up delay-3">&#x2014;&thinsp;Коля &amp; Тедді &#x1F43E;</p>
+        <button class="confetti-btn reveal-up delay-4" id="confetti-btn">&#x1F38A;&ensp;Святкуємо!</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════════════════════════════════ MUSIC PLAYER ══ -->
+  <div class="music-player" id="music-player">
+    <button class="music-btn" id="music-btn" title="Намалюй Мені Ніч">
+      <div class="eq-bars" id="eq-bars">
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <svg class="play-icon" id="play-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M8 5v14l11-7z"/>
+      </svg>
+    </button>
+    <div class="music-label">Намалюй Мені Ніч</div>
+  </div>
+
+  <audio id="bg-audio" src="assets/music.mp3" loop preload="none"></audio>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
