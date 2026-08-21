@@ -28,7 +28,7 @@
 </li>
 <li><p><strong>Overpass</strong> — API щоб завантажувати, фільтрувати чи трансформувати дані з OSM.</p>
 </li>
-<li><p><strong>Osm2geojson</strong> — бібліотека для конвертації даних OSM (та Overpass) в геометрію. Більше деталей в репозиторії <a href="https://github.com/aspectumapp/osm2geojson" target="_blank" rel="noopener noreferrer" >aspectumapp/osm2geojson</a></p>
+<li><p><strong>Osm2geojson</strong> — бібліотека для конвертації даних OSM (та Overpass) в геометрію. Більше деталей в репозиторії <a href="https://github.com/rapkin/osm2geojson" target="_blank" rel="noopener noreferrer" >rapkin/osm2geojson</a></p>
 </li>
 <li><p><strong>Land polygons</strong> — датасет берегової лінії <a href="https://osmdata.openstreetmap.de/data/land-polygons.html" target="_blank" rel="noopener noreferrer" >osmdata/land-polygons</a></p>
 </li>
@@ -77,7 +77,7 @@
 <p>Варто зазначити, що в деяких місцях порядок не обов&#39;язковий і є можливість асинхронно виконувати якісь завдання (наприклад завантаження інформації, або робота з кожним класом геометрії).</p>
 <p>Тепер можна детальніше привести приклади коду для кожного пункту.</p>
 <h2 id="завантаження-даних-з-osm">Завантаження даних з OSM</h2>
-<p>Не зміг знайти хорошої бібліотеки аби відпарсити дані OSM (якщо я погано шукав, то поділіться такою бібліотекою в коментарях), тому щоб сформувати необхідну геометрію я написав бібліотеку <a href="https://github.com/aspectumapp/osm2geojson" target="_blank" rel="noopener noreferrer" >osm2geojson</a>, яка перетворює OSM/Overpass XML в геометрію Shapely або GeoJSON.
+<p>Не зміг знайти хорошої бібліотеки аби відпарсити дані OSM (якщо я погано шукав, то поділіться такою бібліотекою в коментарях), тому щоб сформувати необхідну геометрію я написав бібліотеку <a href="https://github.com/rapkin/osm2geojson" target="_blank" rel="noopener noreferrer" >osm2geojson</a>, яка перетворює OSM/Overpass XML в геометрію Shapely або GeoJSON.
 Звичайно, можна скористатись бібліотекою GDAL, але процес встановлення занадто складний.</p>
 <p>Отож отримати межу міста можна простим запитом до API Overpass:</p>
 <pre><code data-lang="python" class="hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_city_border</span>(<span class="hljs-params">city_id</span>):</span>
